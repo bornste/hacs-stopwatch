@@ -27,3 +27,18 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
+
+  version:
+    name: Version and changelog
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+      - name: Check that the manifest version has a changelog entry
+        run: |
+          version=$(python3 -c "import json; print(json.load(open('custom_components/stopwatch_plus/manifest.json'))['version'])")
+          if ! grep -q "^## \[$version\]" CHANGELOG.md; then
+            echo "::error file=CHANGELOG.md::CHANGELOG.md has no entry '## [$version]' for the version in manifest.json"
+            exit 1
+          fi
+          echo "CHANGELOG.md has an entry for version $version"

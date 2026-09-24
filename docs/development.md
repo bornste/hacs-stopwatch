@@ -48,3 +48,14 @@ The first run creates a separate test environment in `~/ha-dev/test-venv`. Argum
 Debug logging is enabled for `custom_components.stopwatch_plus`. The log is shown in the terminal and under Settings → System → Logs.
 
 Note: Home Assistant no longer supports the "Core" installation method for production use. Running it from a virtual environment is fine for development.
+
+## Releasing
+
+Versions follow [Semantic Versioning](https://semver.org/): `0.x.y` while in development, a new minor version (e.g. `0.2.0`) for new features, a new patch version (e.g. `0.1.1`) for fixes. Git tags are the version with a leading `v`, e.g. `v0.1.0`.
+
+1. **During development:** note every user-facing change under `## [Unreleased]` in `CHANGELOG.md`.
+2. **Prepare the release:** rename `## [Unreleased]` to `## [x.y.z] - YYYY-MM-DD`, add a new empty `## [Unreleased]` above it, update the links at the bottom, and set `"version": "x.y.z"` in `custom_components/stopwatch_plus/manifest.json`. Commit and push; the *Version and changelog* check of the Validate workflow must be green.
+3. **Publish on GitHub:** *Releases → Draft a new release*, choose tag `vx.y.z` → *Create new tag on publish* (target `main`), title `vx.y.z`, paste the changelog entry as description. Tick *Set as a pre-release* for versions that are not stable yet, then *Publish release*.
+4. **Check:** the Release workflow compares the tag with `manifest.json` and `CHANGELOG.md`. If it fails, fix the version, delete the release and its tag, and publish again.
+
+HACS offers every published release as a version; pre-releases only appear for users who enabled beta versions for the repository.

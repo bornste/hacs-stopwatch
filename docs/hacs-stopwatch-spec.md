@@ -138,6 +138,8 @@ hacs.json, README.md, LICENSE, .gitignore, .gitattributes
 tests/ (pytest-homeassistant-custom-component), scripts/test
 pyproject.toml (pytest and Ruff settings), requirements_test*.txt
 .github/workflows/tests.yml (pytest + Ruff)
+.github/workflows/release.yml (checks tag, manifest version and changelog on release)
+CHANGELOG.md
 ```
 
 ## Milestones
