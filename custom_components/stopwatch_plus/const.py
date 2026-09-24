@@ -16,6 +16,20 @@ MAX_INTERVAL: Final = 24 * 3600
 MIN_UPDATE_INTERVAL: Final = 1
 MAX_UPDATE_INTERVAL: Final = 3600
 
+# Optional source entity binding, durations in seconds
+CONF_SOURCE_ENTITY: Final = "source_entity"
+CONF_RUNNING_STATES: Final = "running_states"
+CONF_GRACE_PERIOD: Final = "grace_period"
+CONF_AUTO_RESET: Final = "auto_reset"
+CONF_AUTO_RESET_DELAY: Final = "auto_reset_delay"
+
+DEFAULT_RUNNING_STATES: Final = ["playing", "on"]
+DEFAULT_GRACE_PERIOD: Final = 120
+MAX_GRACE_PERIOD: Final = 3600
+DEFAULT_AUTO_RESET: Final = False
+DEFAULT_AUTO_RESET_DELAY: Final = 1800
+MAX_AUTO_RESET_DELAY: Final = 7 * 24 * 3600
+
 # Status of a stopwatch
 STATUS_IDLE: Final = "idle"
 STATUS_RUNNING: Final = "running"

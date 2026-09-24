@@ -85,8 +85,11 @@ class Stopwatch:
         self.running_since: datetime | None = None
         self.started_at: datetime | None = None
         self.interval_count: int = 0
+        # Persisted state of the source entity binding (see source.py)
+        self.source_data: dict[str, Any] = {}
 
         self._listeners: list[CALLBACK_TYPE] = []
+        self._shutdown_callbacks: list[CALLBACK_TYPE] = []
         self._cancel_interval: CALLBACK_TYPE | None = None
         self._cancel_update: CALLBACK_TYPE | None = None
 
@@ -113,6 +116,7 @@ class Stopwatch:
         self.running_since = dt_util.parse_datetime(data.get("running_since") or "")
         self.started_at = dt_util.parse_datetime(data.get("started_at") or "")
         self.interval_count = int(data.get("interval_count", 0))
+        self.source_data = dict(data.get("source_data") or {})
 
         if self.status == STATUS_RUNNING and self.running_since is None:
             # Inconsistent data, keep the counted time but stop counting
@@ -130,8 +134,16 @@ class Stopwatch:
 
         self._schedule()
 
+    @callback
+    def async_on_shutdown(self, shutdown_callback: CALLBACK_TYPE) -> None:
+        """Register a callback that runs first when the stopwatch shuts down."""
+        self._shutdown_callbacks.append(shutdown_callback)
+
     async def async_shutdown(self) -> None:
-        """Stop all timers and save the state immediately."""
+        """Stop everything that can change the state, then save it immediately."""
+        for shutdown_callback in self._shutdown_callbacks:
+            shutdown_callback()
+        self._shutdown_callbacks.clear()
         self._unschedule()
         await self._store.async_save(self._as_dict())
 
@@ -148,7 +160,13 @@ class Stopwatch:
             "running_since": _isoformat(self.running_since),
             "started_at": _isoformat(self.started_at),
             "interval_count": self.interval_count,
+            "source_data": self.source_data,
         }
+
+    @callback
+    def async_request_save(self) -> None:
+        """Save the state soon, without informing the entities."""
+        self._store.async_delay_save(self._as_dict, SAVE_DELAY)
 
     # Listeners
 
@@ -199,13 +217,25 @@ class Stopwatch:
         self._fire_event(event_type, source)
 
     @callback
-    def async_pause(self, source: str) -> None:
-        """Pause the stopwatch."""
-        if self.status != STATUS_RUNNING:
+    def async_pause(self, source: str, at: datetime | None = None) -> None:
+        """Pause the stopwatch, optionally backdated to an earlier moment.
+
+        A backdated pause does not count the time between that moment and now,
+        e.g. while the source entity was unavailable.
+        """
+        if self.status != STATUS_RUNNING or self.running_since is None:
             return
 
-        self.accumulated_seconds = self.elapsed_seconds
+        now = dt_util.utcnow()
+        paused_at = now if at is None else min(max(at, self.running_since), now)
+        self.accumulated_seconds += (paused_at - self.running_since).total_seconds()
         self.running_since = None
+        if self._interval_seconds:
+            # An interval may have fired within the time that no longer counts
+            self.interval_count = min(
+                self.interval_count,
+                int(self.accumulated_seconds // self._interval_seconds),
+            )
         self.status = STATUS_PAUSED
         self._unschedule()
         self._changed()

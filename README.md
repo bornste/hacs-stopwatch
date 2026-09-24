@@ -34,21 +34,42 @@ A stopwatch integration for [Home Assistant](https://www.home-assistant.io/) tha
 
 ## How it works
 
-A stopwatch is always in one of three states. Every change fires a `stopwatch_plus_event` whose `type` is shown in brackets:
+A stopwatch is always in one of three states: `idle` (at zero), `running` or `paused`. Every change fires a `stopwatch_plus_event`:
 
-```mermaid
-stateDiagram-v2
-    direction LR
-    [*] --> idle
-    idle --> running: start (event started)
-    running --> paused: pause (event paused)
-    paused --> running: start (event resumed)
-    running --> idle: reset (event reset)
-    paused --> idle: reset (event reset)
-    running --> running: interval reached (event interval)
+| What happens | From | To | Event `type` |
+|---|---|---|---|
+| Start | `idle` | `running` | `started` |
+| Start (resume) | `paused` | `running` | `resumed` |
+| Pause | `running` | `paused` | `paused` |
+| Reset | `running` or `paused` | `idle` | `reset` |
+| An interval of running time is reached | `running` | `running` | `interval` |
+
+Commands without effect, such as pausing a stopwatch that is not running, do nothing and fire no event. Only running time counts: pauses are not added to the elapsed time, and interval events fire after every full interval of running time.
+
+### Following a source entity
+
+Optionally, a stopwatch can follow any entity, for example `media_player.xbox`. Set it up in the section **Source entity** when creating the stopwatch or later via **Configure**:
+
+- **Running states:** the stopwatch runs while the entity is in one of these states (e.g. `playing`) and pauses in any other state.
+- **Grace period:** some devices briefly report `unavailable`. Within the grace period nothing happens; if the dropout lasts longer, the stopwatch pauses, backdated to the start of the dropout. Set it to 0 to turn it off: `unavailable` then pauses right away, like any other state that is not a running state.
+- **Auto-reset:** if the entity was inactive for longer than the configured delay, its next start begins a new session – the stopwatch is reset and started again. Until then, the time of the last session stays visible. With a delay of 0, every new start of the entity begins a new session.
+
+Buttons and actions keep working while a source is set.
+
+### Resetting at a fixed time
+
+Without auto-reset, a stopwatch is only reset by its reset button, the action `stopwatch_plus.reset` or an automation – a restart of Home Assistant keeps the time. To start from zero every day, for example, reset it with a time trigger (this can be combined with auto-reset):
+
+```yaml
+alias: Reset the gaming stopwatch every morning
+triggers:
+  - trigger: time
+    at: "04:00:00"
+actions:
+  - action: stopwatch_plus.reset
+    target:
+      entity_id: sensor.gaming_elapsed_time
 ```
-
-Only running time counts: pauses are not added to the elapsed time, and interval events fire after every full interval of running time.
 
 ## Why the domain is `stopwatch_plus`
 

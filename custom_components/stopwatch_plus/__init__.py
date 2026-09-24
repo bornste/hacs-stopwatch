@@ -9,13 +9,23 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 from .const import (
+    CONF_AUTO_RESET,
+    CONF_AUTO_RESET_DELAY,
+    CONF_GRACE_PERIOD,
     CONF_INTERVAL,
+    CONF_RUNNING_STATES,
+    CONF_SOURCE_ENTITY,
     CONF_UPDATE_INTERVAL,
+    DEFAULT_AUTO_RESET,
+    DEFAULT_AUTO_RESET_DELAY,
+    DEFAULT_GRACE_PERIOD,
     DEFAULT_INTERVAL,
+    DEFAULT_RUNNING_STATES,
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
 )
 from .services import async_setup_services
+from .source import SourceBinding
 from .stopwatch import Stopwatch
 
 PLATFORMS: list[Platform] = [Platform.BUTTON, Platform.SENSOR]
@@ -46,6 +56,30 @@ async def async_setup_entry(hass: HomeAssistant, entry: StopwatchConfigEntry) ->
     entry.runtime_data = stopwatch
 
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    # Started after the entities exist, so its events can name them
+    if source_entity := entry.options.get(CONF_SOURCE_ENTITY):
+        options = entry.options
+        binding = SourceBinding(
+            hass,
+            stopwatch,
+            source_entity,
+            running_states=list(
+                options.get(CONF_RUNNING_STATES, DEFAULT_RUNNING_STATES)
+            ),
+            grace_period_seconds=int(
+                options.get(CONF_GRACE_PERIOD, DEFAULT_GRACE_PERIOD)
+            ),
+            auto_reset=bool(options.get(CONF_AUTO_RESET, DEFAULT_AUTO_RESET)),
+            auto_reset_delay_seconds=int(
+                options.get(CONF_AUTO_RESET_DELAY, DEFAULT_AUTO_RESET_DELAY)
+            ),
+        )
+        stopwatch.async_on_shutdown(binding.async_stop)
+        binding.async_start()
+    else:
+        # A source removed in the options leaves no stale binding data behind
+        stopwatch.source_data.clear()
     return True
 
 

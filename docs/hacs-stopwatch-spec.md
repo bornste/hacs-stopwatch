@@ -59,6 +59,9 @@ Commands without effect (starting a running stopwatch, pausing a stopwatch that 
 - Source enters one of the "running" states → start (from `idle`) or resume (from `paused`).
 - Source enters any other valid state (e.g. `off`, `idle`) → pause.
 - Manual actions and buttons keep working; the next source state change takes over again.
+- Only changes of meaning count (running ↔ inactive ↔ unavailable). Attribute changes or a change between two running states (e.g. `playing` → `on`) are ignored, so they do not undo a manual pause.
+- At setup (and after a restart) the stopwatch follows the current state of the source.
+- Default running states: `playing`, `on`; own states can be typed in.
 
 ### Unavailable / unknown source
 
@@ -67,16 +70,18 @@ Some sources (e.g. Xbox) briefly report `unavailable` or `unknown` while still i
 - On `unavailable` / `unknown` the stopwatch keeps its current status and remembers the moment.
 - If the source returns to a "running" state within the grace period → nothing happened, the time keeps counting without a gap.
 - If the grace period expires, or the source returns to a non-running state → pause, backdated to the moment the source became unavailable (the unavailable time is not counted).
-- Grace period configurable, default 2 minutes.
+- Grace period configurable, default 2 minutes, at most 1 hour. 0 turns it off: `unavailable` / `unknown` then pause immediately, like any other non-running state.
 
 ### Auto-reset
 
-- Option on/off (default: off) and inactivity delay in minutes (default: 30).
+- Option on/off (default: off) and inactivity delay (default: 30 minutes, at most 7 days). A delay of 0 makes every new start of the source a new session.
 - When the source becomes inactive (non-running, or unavailable beyond the grace period), the inactivity time starts.
 - If the source becomes "running" again **after** the delay has passed, the stopwatch is reset and then started – a new session.
 - If it becomes "running" again **before** the delay has passed, the stopwatch simply resumes – same session.
 - The reset happens only at the start of the next session, so the time of the last session stays visible until then.
 - Only applies when a source entity is configured.
+- Only applies when the stopwatch is paused at that moment; a stopwatch started by hand in the meantime is not reset.
+- The inactivity start and a running grace period are persisted, so both survive a restart of Home Assistant.
 
 ## Events and triggers
 
@@ -138,7 +143,7 @@ pyproject.toml (pytest and Ruff settings), requirements_test*.txt
 ## Milestones
 
 1. **Manual stopwatch** – done: state logic with restore, sensors, buttons, actions, events incl. intervals, config and options flow (name, interval, update interval), tests for the minimum and the latest Home Assistant. After the first test: intervals in seconds, integration instead of helper.
-2. Source entity with grace period and auto-reset.
+2. **Source entity** – done: binding with running states, grace period with backdated pause, auto-reset for new sessions, persisted across restarts; settings in a collapsible "Source entity" section of the config and options flow.
 3. Device triggers in the automation editor.
 4. Dashboard card with live counting.
 5. Icon, first release v0.1.0, submission to HACS.
@@ -158,3 +163,7 @@ Custom integrations read their texts from `translations/<language>.json`; `trans
 ## Open points
 
 - Check at the first release whether HACS shows the bundled icon in its store view.
+
+## Ideas (not planned yet)
+
+- Sensor "last session duration" (`state_class: measurement`, duration in seconds), updated when a session ends, so the duration of every session goes into the long-term statistics without a template sensor. Use case: how long a window was open at a stretch.

@@ -41,7 +41,7 @@ The first run creates a separate test environment in `~/ha-dev/test-venv`. Argum
 
 ### Simulated game console
 
-`dev/configuration.yaml` provides `sensor.fake_console`, controlled by `input_select.fake_console_state` (`playing`, `idle`, `off`) and `input_boolean.fake_console_unavailable` (simulates a dropout). Use it as the source entity of a test stopwatch.
+`dev/configuration.yaml` provides `sensor.fake_console`, controlled by `input_select.fake_console_state` (`playing`, `idle`, `off`) and `input_boolean.fake_console_unavailable` (simulates a dropout). Use it as the source entity of a test stopwatch (section *Source entity*, running state `playing`). A short grace period (e.g. 20 seconds) and a short auto-reset delay (1 minute) make the behaviour easy to try out.
 
 ### Logs
 
