@@ -25,6 +25,10 @@ The obvious domain would be `stopwatch`. It is deliberately **not** used: if Hom
 
 Coming soon via [HACS](https://hacs.xyz/).
 
+## Development
+
+See [docs/development.md](docs/development.md) for the local development instance.
+
 ## License
 
 [MIT](LICENSE)

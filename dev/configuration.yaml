@@ -1,0 +1,37 @@
+# Configuration of the local development instance (linked by scripts/setup).
+# Not used by the integration itself.
+
+default_config:
+
+# Allow automations, scripts and scenes created in the UI (files are created by scripts/setup)
+automation: !include automations.yaml
+script: !include scripts.yaml
+scene: !include scenes.yaml
+
+logger:
+  default: warning
+  logs:
+    custom_components.stopwatch_plus: debug
+
+# Simulated game console to test the source entity binding.
+# Change "Fake console state" to switch between playing / idle / off,
+# and turn on "Fake console unavailable" to simulate a dropout.
+input_select:
+  fake_console_state:
+    name: Fake console state
+    options:
+      - playing
+      - idle
+      - "off"
+    initial: "off"
+
+input_boolean:
+  fake_console_unavailable:
+    name: Fake console unavailable
+
+template:
+  - sensor:
+      - name: Fake console
+        unique_id: fake_console
+        state: "{{ states('input_select.fake_console_state') }}"
+        availability: "{{ is_state('input_boolean.fake_console_unavailable', 'off') }}"

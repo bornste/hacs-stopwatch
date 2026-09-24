@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+# Set up a local Home Assistant development instance inside WSL (Ubuntu/Debian).
+# Usage (inside WSL, from the repository folder): bash scripts/setup
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+DEV_DIR="${HOME}/ha-dev"
+CONFIG_DIR="${DEV_DIR}/config"
+# Current Home Assistant releases require Python 3.14.2 or newer.
+# Older releases may need an older Python, e.g.:
+#   HA_VERSION=2026.1.0 PYTHON_VERSION=3.13 bash scripts/setup
+PYTHON_VERSION="${PYTHON_VERSION:->=3.14.2,<3.15}"
+HA_VERSION="${HA_VERSION:-}"
+
+echo "==> Installing system packages (your WSL password is required)"
+sudo apt-get update
+sudo apt-get install -y curl build-essential libffi-dev libssl-dev zlib1g-dev libjpeg-dev
+# Optional libraries that avoid harmless DHCP and camera errors in the log;
+# package names differ between Ubuntu and Debian releases
+sudo apt-get install -y libpcap0.8 || sudo apt-get install -y libpcap0.8t64 || true
+sudo apt-get install -y libturbojpeg || sudo apt-get install -y libturbojpeg0 || true
+
+if ! command -v uv >/dev/null 2>&1; then
+  echo "==> Installing uv (Python package and version manager)"
+  curl -LsSf https://astral.sh/uv/install.sh | sh
+  export PATH="${HOME}/.local/bin:${PATH}"
+fi
+# An outdated uv may not know the latest Python releases
+uv self update || true
+
+echo "==> Creating the virtual environment (Python ${PYTHON_VERSION})"
+# uv downloads the requested Python version if it is not installed yet
+uv venv --allow-existing --python "${PYTHON_VERSION}" "${DEV_DIR}/venv"
+
+echo "==> Installing Home Assistant ${HA_VERSION:-(latest)}"
+if [ -n "${HA_VERSION}" ]; then
+  uv pip install --python "${DEV_DIR}/venv/bin/python" "homeassistant==${HA_VERSION}"
+else
+  uv pip install --python "${DEV_DIR}/venv/bin/python" --upgrade homeassistant
+fi
+
+echo "==> Linking the integration and the development configuration"
+mkdir -p "${CONFIG_DIR}/custom_components"
+# Symlinks keep the instance in sync with the repository, no copying needed
+ln -sfn "${REPO_DIR}/custom_components/stopwatch_plus" "${CONFIG_DIR}/custom_components/stopwatch_plus"
+ln -sfn "${REPO_DIR}/dev/configuration.yaml" "${CONFIG_DIR}/configuration.yaml"
+
+# Files for automations, scripts and scenes created in the UI (included by configuration.yaml)
+for file in automations.yaml scenes.yaml; do
+  [ -e "${CONFIG_DIR}/${file}" ] || echo "[]" > "${CONFIG_DIR}/${file}"
+done
+[ -e "${CONFIG_DIR}/scripts.yaml" ] || touch "${CONFIG_DIR}/scripts.yaml"
+
+echo
+echo "Done. Start Home Assistant with: bash scripts/develop"

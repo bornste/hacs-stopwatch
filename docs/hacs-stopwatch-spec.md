@@ -25,7 +25,7 @@ Last updated: 2026-09-24. Repository: https://github.com/bornste/hacs-stopwatch 
 
 ## Multiple stopwatches
 
-Each stopwatch is its own config entry (the manifest declares `integration_type: helper`, so it is expected under Settings → Devices & services → Helpers → Create helper → Stopwatch Plus; to be verified in the first test), e.g. "Gaming", "Work time". Each entry creates a device with its own entities. Actions select the stopwatch via `target` (entity or device), for example:
+Each stopwatch is its own config entry (the manifest declares `integration_type: helper`, so it is created under Settings → Devices & services → Helpers → Create helper → Stopwatch Plus), e.g. "Gaming", "Work time". Each entry creates a device with its own entities. Actions select the stopwatch via `target` (entity or device), for example:
 
 ```yaml
 action: stopwatch_plus.start
@@ -44,6 +44,8 @@ target:
 ## Actions
 
 `stopwatch_plus.start` (also resumes), `stopwatch_plus.pause`, `stopwatch_plus.reset`, `stopwatch_plus.toggle` – target: stopwatch entity or device.
+
+Each call acts once per stopwatch, even if the target resolves to several entities of the same stopwatch (e.g. when a device is targeted).
 
 `reset` sets the elapsed time to 0 and the status to `idle`, regardless of the previous status.
 
@@ -108,7 +110,9 @@ custom_components/stopwatch_plus/
   device_trigger.py, services.yaml,
   translations/en.json, translations/de.json,
   frontend/stopwatch-card.js (phase 2)
-docs/hacs-stopwatch-spec.md
+docs/hacs-stopwatch-spec.md, docs/development.md
+scripts/setup, scripts/develop (local development instance in WSL)
+dev/configuration.yaml (configuration of the development instance)
 hacs.json, README.md, LICENSE, .gitignore, .gitattributes
 .github/workflows/validate.yml (HACS action + hassfest)
 tests/ (pytest-homeassistant-custom-component)

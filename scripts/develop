@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+# Start the local Home Assistant development instance created by scripts/setup.
+# Usage (inside WSL, from the repository folder): bash scripts/develop
+set -euo pipefail
+
+DEV_DIR="${HOME}/ha-dev"
+
+if [ ! -x "${DEV_DIR}/venv/bin/hass" ]; then
+  echo "Home Assistant is not installed yet. Run: bash scripts/setup" >&2
+  exit 1
+fi
+
+echo "Starting Home Assistant – open http://localhost:8123 in your browser (Ctrl+C to stop)"
+exec "${DEV_DIR}/venv/bin/hass" --config "${DEV_DIR}/config"
