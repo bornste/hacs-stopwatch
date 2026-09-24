@@ -1,0 +1,16 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Create a stopwatch",
+        "description": "Create a new stopwatch, for example for gaming or work time.",
+        "data": {
+          "name": "Name"
+        },
+        "data_description": {
+          "name": "Used for the device and its entities, e.g. \"Gaming\"."
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Stoppuhr erstellen",
+        "description": "Erstelle eine neue Stoppuhr, zum Beispiel fürs Gaming oder für die Arbeitszeit.",
+        "data": {
+          "name": "Name"
+        },
+        "data_description": {
+          "name": "Wird für das Gerät und seine Entitäten verwendet, z. B. „Gaming“."
+        }
+      }
+    }
+  }
+}

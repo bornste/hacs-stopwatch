@@ -1,0 +1,18 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# Local Home Assistant test configuration
+config/
+
+# Editors and operating systems
+.idea/
+.DS_Store
+Thumbs.db
