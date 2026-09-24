@@ -5,12 +5,113 @@
         "title": "Stoppuhr erstellen",
         "description": "Erstelle eine neue Stoppuhr, zum Beispiel fürs Gaming oder für die Arbeitszeit.",
         "data": {
-          "name": "Name"
+          "name": "Name",
+          "interval": "Intervall",
+          "update_interval": "Aktualisierungsintervall des Sensors"
         },
         "data_description": {
-          "name": "Wird für das Gerät und seine Entitäten verwendet, z. B. „Gaming“."
+          "name": "Wird für das Gerät und seine Entitäten verwendet, z. B. „Gaming“.",
+          "interval": "Jedes Mal, wenn so viel Laufzeit vergangen ist, wird ein Intervall-Ereignis ausgelöst. 0 schaltet es aus. Höchstens 24 Stunden.",
+          "update_interval": "Wie oft der Laufzeit-Sensor aktualisiert wird, während die Stoppuhr läuft, zwischen 1 Sekunde und 1 Stunde. Kürzere Intervalle schreiben mehr Daten in die Datenbank."
         }
       }
+    },
+    "error": {
+      "interval_too_long": "Das Intervall darf höchstens 24 Stunden betragen.",
+      "update_interval_out_of_range": "Das Aktualisierungsintervall muss zwischen 1 Sekunde und 1 Stunde liegen."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Optionen der Stoppuhr",
+        "data": {
+          "interval": "Intervall",
+          "update_interval": "Aktualisierungsintervall des Sensors"
+        },
+        "data_description": {
+          "interval": "Jedes Mal, wenn so viel Laufzeit vergangen ist, wird ein Intervall-Ereignis ausgelöst. 0 schaltet es aus. Höchstens 24 Stunden.",
+          "update_interval": "Wie oft der Laufzeit-Sensor aktualisiert wird, während die Stoppuhr läuft, zwischen 1 Sekunde und 1 Stunde. Kürzere Intervalle schreiben mehr Daten in die Datenbank."
+        }
+      }
+    },
+    "error": {
+      "interval_too_long": "Das Intervall darf höchstens 24 Stunden betragen.",
+      "update_interval_out_of_range": "Das Aktualisierungsintervall muss zwischen 1 Sekunde und 1 Stunde liegen."
+    }
+  },
+  "entity": {
+    "button": {
+      "start": {
+        "name": "Start"
+      },
+      "pause": {
+        "name": "Pause"
+      },
+      "reset": {
+        "name": "Zurücksetzen"
+      }
+    },
+    "sensor": {
+      "elapsed": {
+        "name": "Laufzeit",
+        "state_attributes": {
+          "elapsed_formatted": {
+            "name": "Laufzeit (formatiert)"
+          },
+          "status": {
+            "name": "Status",
+            "state": {
+              "idle": "Bereit",
+              "running": "Läuft",
+              "paused": "Pausiert"
+            }
+          },
+          "started_at": {
+            "name": "Gestartet um"
+          },
+          "running_since": {
+            "name": "Läuft seit"
+          },
+          "accumulated_seconds": {
+            "name": "Angesammelte Sekunden"
+          },
+          "interval_count": {
+            "name": "Anzahl Intervalle"
+          }
+        }
+      },
+      "status": {
+        "name": "Status",
+        "state": {
+          "idle": "Bereit",
+          "running": "Läuft",
+          "paused": "Pausiert"
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "no_stopwatch_targeted": {
+      "message": "Es wurde keine geladene Stoppuhr ausgewählt. Wähle eine Entität oder ein Gerät von Stopwatch Plus."
+    }
+  },
+  "services": {
+    "start": {
+      "name": "Starten",
+      "description": "Startet die ausgewählten Stoppuhren oder setzt sie fort, wenn sie pausiert sind."
+    },
+    "pause": {
+      "name": "Pausieren",
+      "description": "Pausiert die ausgewählten Stoppuhren."
+    },
+    "reset": {
+      "name": "Zurücksetzen",
+      "description": "Setzt die ausgewählten Stoppuhren auf null zurück und hält sie an."
+    },
+    "toggle": {
+      "name": "Umschalten",
+      "description": "Pausiert die ausgewählten Stoppuhren, wenn sie laufen, und startet sie sonst."
     }
   }
 }

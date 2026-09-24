@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Run the automated tests inside WSL. A separate test environment is created on first use.
+# Usage (inside WSL, from the repository folder): bash scripts/test [pytest arguments]
+set -euo pipefail
+
+REPO_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+VENV_DIR="${HOME}/ha-dev/test-venv"
+export PATH="${HOME}/.local/bin:${PATH}"
+
+if ! command -v uv >/dev/null 2>&1; then
+  echo "uv is not installed yet. Run: bash scripts/setup" >&2
+  exit 1
+fi
+
+uv venv --quiet --allow-existing --python ">=3.14.2,<3.15" "${VENV_DIR}"
+uv pip install --quiet --python "${VENV_DIR}/bin/python" -r "${REPO_DIR}/requirements_test.txt"
+
+cd "${REPO_DIR}"
+exec "${VENV_DIR}/bin/pytest" "$@"

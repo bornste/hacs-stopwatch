@@ -30,6 +30,15 @@ The first start takes a few minutes. Open http://localhost:8123 and create a loc
 
 Python and translation changes require a restart of Home Assistant: Settings → System → Restart (top right), or `Ctrl+C` in the terminal and `bash scripts/develop` again.
 
+### Automated tests
+
+```bash
+cd /mnt/c/Dev/GitHub/bornste/hacs-stopwatch
+bash scripts/test
+```
+
+The first run creates a separate test environment in `~/ha-dev/test-venv`. Arguments are passed to pytest, e.g. `bash scripts/test -k interval`. The same tests run on GitHub for every push, against the minimum (`requirements_test_min.txt`) and the latest supported Home Assistant (`requirements_test.txt`).
+
 ### Simulated game console
 
 `dev/configuration.yaml` provides `sensor.fake_console`, controlled by `input_select.fake_console_state` (`playing`, `idle`, `off`) and `input_boolean.fake_console_unavailable` (simulates a dropout). Use it as the source entity of a test stopwatch.

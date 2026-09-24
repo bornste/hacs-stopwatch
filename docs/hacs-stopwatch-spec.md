@@ -10,12 +10,13 @@ Last updated: 2026-09-24. Repository: https://github.com/bornste/hacs-stopwatch 
 | Display name | "Stopwatch Plus" |
 | Elapsed state | Sensor, numeric in seconds, `device_class: duration` |
 | Update interval | Configurable in the options; default **60 s** |
+| Integration type | `service` – stopwatches are listed under Settings → Devices & services → Integrations, one device per stopwatch; not a helper, so they do not fill up the helper list |
 | Live display | Attributes allow client-side counting; a dashboard card bundled with the integration (phase 2) |
 | Home Assistant restart | State is restored; if the stopwatch was running, the downtime is counted |
 | Source entity | Optional: an entity plus the states that count as "running" (e.g. `media_player.xbox` = `playing`) → start/resume and pause automatically |
 | Auto-reset | Optional (on/off) with a configurable inactivity delay (see below) |
 | Unavailable source | Grace period before the stopwatch reacts (see below) |
-| Interval events | Configurable interval of running time (pauses do not count) |
+| Interval events | Configurable interval of running time (pauses do not count), with second precision |
 | Triggers | One event type with a `type` field, exposed as separate device triggers (see below) |
 | Code style | Python / Home Assistant standard snake_case; comments in English |
 | Documentation | All documents in the repository are written in English |
@@ -25,17 +26,19 @@ Last updated: 2026-09-24. Repository: https://github.com/bornste/hacs-stopwatch 
 
 ## Multiple stopwatches
 
-Each stopwatch is its own config entry (the manifest declares `integration_type: helper`, so it is created under Settings → Devices & services → Helpers → Create helper → Stopwatch Plus), e.g. "Gaming", "Work time". Each entry creates a device with its own entities. Actions select the stopwatch via `target` (entity or device), for example:
+Each stopwatch is its own config entry (Settings → Devices & services → Add integration → Stopwatch Plus), e.g. "Gaming", "Work time". Each entry creates a device with its own entities. Actions select the stopwatch via `target` (entity or device), for example:
 
 ```yaml
 action: stopwatch_plus.start
 target:
-  entity_id: sensor.gaming_elapsed
+  entity_id: sensor.gaming_elapsed_time
 ```
 
 ## Entities per stopwatch (one device)
 
-- `sensor.<name>_elapsed` – elapsed running time (seconds, duration). Attributes: `status`, `started_at`, `running_since`, `accumulated_seconds`, `interval_count`.
+Entity IDs are derived from the English entity names, whatever the language of the Home Assistant instance.
+
+- `sensor.<name>_elapsed_time` – elapsed running time (seconds, duration, display precision 0). Attributes: `elapsed_formatted`, `status`, `started_at`, `running_since`, `accumulated_seconds`, `interval_count`. `elapsed_formatted` is excluded from the recorder (it is derived from the state).
 - `sensor.<name>_status` – enum: `idle` / `running` / `paused` (translated).
 - `button.<name>_start` – starts or resumes.
 - `button.<name>_pause`
@@ -48,6 +51,8 @@ target:
 Each call acts once per stopwatch, even if the target resolves to several entities of the same stopwatch (e.g. when a device is targeted).
 
 `reset` sets the elapsed time to 0 and the status to `idle`, regardless of the previous status.
+
+Commands without effect (starting a running stopwatch, pausing a stopwatch that is not running, resetting an idle one) do nothing and fire no event. An action whose target contains no loaded stopwatch raises a validation error.
 
 ## Source entity
 
@@ -85,13 +90,23 @@ One event type on the Home Assistant event bus: `stopwatch_plus_event`.
 | `reset` | Reset (manually or by auto-reset) |
 | `interval` | An interval of running time has been reached |
 
-Event data: `type`, `entity_id`, `device_id`, `name`, `elapsed_seconds`, `elapsed_formatted` (e.g. `1:05:00`), `interval_count`, `source` (`action`, `button`, `source_entity`, `auto_reset`, `restore`).
+Event data: `type`, `entity_id`, `device_id`, `name`, `elapsed_seconds`, `elapsed_formatted` (see below), `interval_count`, `source` (`action`, `button`, `source_entity`, `auto_reset`; `null` for `interval` events). For `interval` events, `elapsed_seconds` is the exact threshold (e.g. 3600), not the slightly later firing time.
 
 Each `type` is also available as its own device trigger in the automation editor ("Stopwatch started", "Interval reached", …). Interval events fire at the exact moment, independent of the sensor update interval. A state trigger on the status sensor remains possible as a generic alternative.
 
+An interval shorter than the sensor update interval is fine: interval events are scheduled independently and fire on time. Every interval event also refreshes the elapsed time sensor, so the sensor effectively updates at the shorter of both intervals (and writes to the database as often).
+
+Restoring the state after a restart fires no events. Intervals that fell into the downtime of a running stopwatch are skipped (not fired in a burst); counting continues with the next threshold.
+
+## Time format
+
+`elapsed_formatted` (attribute and event data) uses `HH:MM:SS`, and `d.HH:MM:SS` from 24 hours on – the constant ("c") format of a .NET `TimeSpan`. Examples: `00:02:30`, `12:05:09`, `1.02:03:04`, `10.00:00:05`. Hours, minutes and seconds always have two digits; days have no leading zero and only appear when needed.
+
+The attribute is updated together with the sensor state (update interval); event data is calculated at the moment of the event and is always exact.
+
 ## Setup (config flow / options)
 
-Name; optional source entity and the states that count as "running"; grace period for unavailable source; auto-reset on/off and delay; interval in minutes (0 = off); sensor update interval. Everything can be changed later via "Configure" (options flow).
+Name; optional source entity and the states that count as "running"; grace period for unavailable source; auto-reset on/off and delay; interval (0 = off, max. 24 h); sensor update interval (1 s – 1 h). Both are entered with Home Assistant's duration field (hours, minutes, seconds) and stored in seconds. Everything except the name can be changed later via "Configure" (options flow); saving the options reloads the stopwatch. The state is stored per stopwatch in Home Assistant's `.storage` folder and deleted when the stopwatch is removed.
 
 ## Live display with infrequent sensor updates
 
@@ -106,8 +121,8 @@ An integration cannot exclude its own states from the recorder. With 1 s updates
 ```
 custom_components/stopwatch_plus/
   __init__.py, manifest.json, const.py, config_flow.py,
-  stopwatch.py (state logic), sensor.py, button.py,
-  device_trigger.py, services.yaml,
+  stopwatch.py (state logic), entity.py, sensor.py, button.py,
+  services.py, services.yaml, device_trigger.py,
   translations/en.json, translations/de.json,
   frontend/stopwatch-card.js (phase 2)
 docs/hacs-stopwatch-spec.md, docs/development.md
@@ -115,8 +130,22 @@ scripts/setup, scripts/develop (local development instance in WSL)
 dev/configuration.yaml (configuration of the development instance)
 hacs.json, README.md, LICENSE, .gitignore, .gitattributes
 .github/workflows/validate.yml (HACS action + hassfest)
-tests/ (pytest-homeassistant-custom-component)
+tests/ (pytest-homeassistant-custom-component), scripts/test
+pyproject.toml (pytest and Ruff settings), requirements_test*.txt
+.github/workflows/tests.yml (pytest + Ruff)
 ```
+
+## Milestones
+
+1. **Manual stopwatch** – done: state logic with restore, sensors, buttons, actions, events incl. intervals, config and options flow (name, interval, update interval), tests for the minimum and the latest Home Assistant. After the first test: intervals in seconds, integration instead of helper.
+2. Source entity with grace period and auto-reset.
+3. Device triggers in the automation editor.
+4. Dashboard card with live counting.
+5. Icon, first release v0.1.0, submission to HACS.
+
+## Quality
+
+Automated tests with `pytest-homeassistant-custom-component` run on every push against the minimum (2026.1) and the latest Home Assistant; Ruff checks linting and formatting.
 
 ## Translations
 

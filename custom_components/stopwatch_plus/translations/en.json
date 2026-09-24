@@ -5,12 +5,113 @@
         "title": "Create a stopwatch",
         "description": "Create a new stopwatch, for example for gaming or work time.",
         "data": {
-          "name": "Name"
+          "name": "Name",
+          "interval": "Interval",
+          "update_interval": "Sensor update interval"
         },
         "data_description": {
-          "name": "Used for the device and its entities, e.g. \"Gaming\"."
+          "name": "Used for the device and its entities, e.g. \"Gaming\".",
+          "interval": "Fire an interval event every time this much running time has passed. 0 turns it off. At most 24 hours.",
+          "update_interval": "How often the elapsed time sensor is updated while running, between 1 second and 1 hour. Shorter intervals write more data to the database."
         }
       }
+    },
+    "error": {
+      "interval_too_long": "The interval can be at most 24 hours.",
+      "update_interval_out_of_range": "The update interval must be between 1 second and 1 hour."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Stopwatch options",
+        "data": {
+          "interval": "Interval",
+          "update_interval": "Sensor update interval"
+        },
+        "data_description": {
+          "interval": "Fire an interval event every time this much running time has passed. 0 turns it off. At most 24 hours.",
+          "update_interval": "How often the elapsed time sensor is updated while running, between 1 second and 1 hour. Shorter intervals write more data to the database."
+        }
+      }
+    },
+    "error": {
+      "interval_too_long": "The interval can be at most 24 hours.",
+      "update_interval_out_of_range": "The update interval must be between 1 second and 1 hour."
+    }
+  },
+  "entity": {
+    "button": {
+      "start": {
+        "name": "Start"
+      },
+      "pause": {
+        "name": "Pause"
+      },
+      "reset": {
+        "name": "Reset"
+      }
+    },
+    "sensor": {
+      "elapsed": {
+        "name": "Elapsed time",
+        "state_attributes": {
+          "elapsed_formatted": {
+            "name": "Elapsed time (formatted)"
+          },
+          "status": {
+            "name": "Status",
+            "state": {
+              "idle": "Idle",
+              "running": "Running",
+              "paused": "Paused"
+            }
+          },
+          "started_at": {
+            "name": "Started at"
+          },
+          "running_since": {
+            "name": "Running since"
+          },
+          "accumulated_seconds": {
+            "name": "Accumulated seconds"
+          },
+          "interval_count": {
+            "name": "Interval count"
+          }
+        }
+      },
+      "status": {
+        "name": "Status",
+        "state": {
+          "idle": "Idle",
+          "running": "Running",
+          "paused": "Paused"
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "no_stopwatch_targeted": {
+      "message": "No loaded stopwatch was targeted. Select a Stopwatch Plus entity or device."
+    }
+  },
+  "services": {
+    "start": {
+      "name": "Start",
+      "description": "Starts the targeted stopwatches, or resumes them when they are paused."
+    },
+    "pause": {
+      "name": "Pause",
+      "description": "Pauses the targeted stopwatches."
+    },
+    "reset": {
+      "name": "Reset",
+      "description": "Resets the targeted stopwatches to zero and stops them."
+    },
+    "toggle": {
+      "name": "Toggle",
+      "description": "Pauses the targeted stopwatches when they are running, otherwise starts them."
     }
   }
 }

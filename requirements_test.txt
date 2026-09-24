@@ -1,0 +1,2 @@
+# Test dependencies for the latest supported Home Assistant (pins Home Assistant itself)
+pytest-homeassistant-custom-component==0.13.366

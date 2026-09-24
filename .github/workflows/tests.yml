@@ -1,0 +1,48 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  pytest:
+    name: pytest (${{ matrix.name }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: minimum Home Assistant
+            python: "3.13"
+            requirements: requirements_test_min.txt
+          - name: latest Home Assistant
+            python: "3.14"
+            requirements: requirements_test.txt
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python }}
+      - name: Install the test dependencies
+        run: pip install -r ${{ matrix.requirements }}
+      - name: Run the tests
+        run: pytest
+
+  ruff:
+    name: Ruff
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v5
+      - name: Lint
+        uses: astral-sh/ruff-action@v3
+      - name: Check formatting
+        uses: astral-sh/ruff-action@v3
+        with:
+          args: "format --check"

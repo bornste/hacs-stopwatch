@@ -25,6 +25,27 @@ The obvious domain would be `stopwatch`. It is deliberately **not** used: if Hom
 
 Coming soon via [HACS](https://hacs.xyz/).
 
+## Displaying the elapsed time
+
+The elapsed time sensor reports whole seconds, e.g. `163 s`. Some options for a nicer display:
+
+- **Display unit:** open the sensor, then the settings (gear icon), and set the display unit to *minutes*. Home Assistant then shows the time as a duration, e.g. `2 min 43 s`. This only changes the display; automations still see seconds.
+- **Formatted attribute:** the attribute `elapsed_formatted` contains the time as `HH:MM:SS`, from 24 hours on as `d.HH:MM:SS` (e.g. `00:02:43`, `1.02:03:04`). Cards that can show an attribute can use it directly. It is updated together with the sensor (see the update interval) and is not stored in the database.
+- **Notifications:** every event carries the same formatted value, calculated at the moment of the event, so it can be passed on without a template filter:
+
+```yaml
+triggers:
+  - trigger: event
+    event_type: stopwatch_plus_event
+    event_data:
+      type: interval
+      entity_id: sensor.gaming_elapsed_time
+actions:
+  - action: notify.notify
+    data:
+      message: "Playing for {{ trigger.event.data.elapsed_formatted }}"
+```
+
 ## Development
 
 See [docs/development.md](docs/development.md) for the local development instance.
@@ -32,3 +53,7 @@ See [docs/development.md](docs/development.md) for the local development instanc
 ## License
 
 [MIT](LICENSE)
+
+---
+
+Made with ❤️ by [@bornste](https://github.com/bornste) and Claude

@@ -1,0 +1,2 @@
+# Test dependencies for the minimum supported Home Assistant 2026.1.0 (see hacs.json)
+pytest-homeassistant-custom-component==0.13.305
