@@ -4,6 +4,10 @@ All notable changes to Stopwatch Plus are documented here. The format follows [K
 
 ## [Unreleased]
 
+### Added
+
+- Device triggers for every event type (*Stopwatch started*, *paused*, *resumed*, *reset* and *Interval reached*), selectable in the automation editor without typing the event name. `trigger.event.data` holds the same values as the event.
+
 ## [0.1.0] - 2026-09-24
 
 First pre-release.

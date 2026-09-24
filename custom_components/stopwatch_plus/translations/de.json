@@ -159,5 +159,14 @@
       "name": "Umschalten",
       "description": "Pausiert die ausgewählten Stoppuhren, wenn sie laufen, und startet sie sonst."
     }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "started": "Stoppuhr gestartet",
+      "paused": "Stoppuhr pausiert",
+      "resumed": "Stoppuhr fortgesetzt",
+      "reset": "Stoppuhr zurückgesetzt",
+      "interval": "Intervall erreicht"
+    }
   }
 }

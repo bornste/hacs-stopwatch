@@ -159,5 +159,14 @@
       "name": "Toggle",
       "description": "Pauses the targeted stopwatches when they are running, otherwise starts them."
     }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "started": "Stopwatch started",
+      "paused": "Stopwatch paused",
+      "resumed": "Stopwatch resumed",
+      "reset": "Stopwatch reset",
+      "interval": "Interval reached"
+    }
   }
 }

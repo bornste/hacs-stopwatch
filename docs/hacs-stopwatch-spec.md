@@ -146,7 +146,7 @@ CHANGELOG.md
 
 1. **Manual stopwatch** – done: state logic with restore, sensors, buttons, actions, events incl. intervals, config and options flow (name, interval, update interval), tests for the minimum and the latest Home Assistant. After the first test: intervals in seconds, integration instead of helper.
 2. **Source entity** – done: binding with running states, grace period with backdated pause, auto-reset for new sessions, persisted across restarts; settings in a collapsible "Source entity" section of the config and options flow.
-3. Device triggers in the automation editor.
+3. **Device triggers** – done: one device trigger per event type (`started`, `paused`, `resumed`, `reset`, `interval`), based on `stopwatch_plus_event` filtered by `device_id` and `type`; translated names in English and German.
 4. Dashboard card with live counting.
 5. Icon, first release v0.1.0, submission to HACS.
 

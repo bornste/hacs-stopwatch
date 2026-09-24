@@ -53,8 +53,21 @@ Note: Home Assistant no longer supports the "Core" installation method for produ
 
 Versions follow [Semantic Versioning](https://semver.org/): `0.x.y` while in development, a new minor version (e.g. `0.2.0`) for new features, a new patch version (e.g. `0.1.1`) for fixes. Git tags are the version with a leading `v`, e.g. `v0.1.0`.
 
-1. **During development:** note every user-facing change under `## [Unreleased]` in `CHANGELOG.md`.
-2. **Prepare the release:** rename `## [Unreleased]` to `## [x.y.z] - YYYY-MM-DD`, add a new empty `## [Unreleased]` above it, update the links at the bottom, and set `"version": "x.y.z"` in `custom_components/stopwatch_plus/manifest.json`. Commit and push; the *Version and changelog* check of the Validate workflow must be green.
+### Development versions
+
+Between two releases, `manifest.json` carries the **next** version with a `.devN` suffix (PEP 440 format), e.g. `0.2.0.dev1`, `0.2.0.dev2`, … Home Assistant shows it under Settings → Devices & services, so it is always clear which build is running.
+
+- After a release, the next change sets the version to the next planned version with `.dev1` (e.g. after `0.1.0` → `0.2.0.dev1`).
+- **Every further change set increases `N` by one** (`.dev1` → `.dev2`), together with an entry under `## [Unreleased]` in `CHANGELOG.md`.
+- If a change turns out to need a bigger step (e.g. from `0.1.1.dev2` to a feature release), change the base version and keep counting: `0.2.0.dev3`.
+- Development versions sort before the release (`0.2.0.dev3` < `0.2.0`), so HACS treats the release as an update.
+
+The *Version and changelog* check accepts a `.devN` version when `CHANGELOG.md` has a `## [Unreleased]` section, and a release version only when it has a `## [x.y.z]` section.
+
+### Publishing a release
+
+1. **During development:** note every user-facing change under `## [Unreleased]` in `CHANGELOG.md` and count up the development version (see above).
+2. **Prepare the release:** rename `## [Unreleased]` to `## [x.y.z] - YYYY-MM-DD`, add a new empty `## [Unreleased]` above it, update the links at the bottom, and set `"version": "x.y.z"` in `custom_components/stopwatch_plus/manifest.json` – **without** the `.devN` suffix. Commit and push; the *Version and changelog* check of the Validate workflow must be green.
 3. **Publish on GitHub:** *Releases → Draft a new release*, choose tag `vx.y.z` → *Create new tag on publish* (target `main`), title `vx.y.z`, paste the changelog entry as description. Tick *Set as a pre-release* for versions that are not stable yet, then *Publish release*.
 4. **Check:** the Release workflow compares the tag with `manifest.json` and `CHANGELOG.md`. If it fails, fix the version, delete the release and its tag, and publish again.
 

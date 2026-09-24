@@ -46,6 +46,8 @@ A stopwatch is always in one of three states: `idle` (at zero), `running` or `pa
 
 Commands without effect, such as pausing a stopwatch that is not running, do nothing and fire no event. Only running time counts: pauses are not added to the elapsed time, and interval events fire after every full interval of running time.
 
+In the automation editor, every event type is also available as a **device trigger** of the stopwatch: add a trigger *Device*, choose the stopwatch (e.g. "Gaming") and pick *Stopwatch started*, *Interval reached* and so on – nothing has to be typed. The device trigger provides the same values as the event in `trigger.event.data`, e.g. `{{ trigger.event.data.elapsed_formatted }}`.
+
 ### Following a source entity
 
 Optionally, a stopwatch can follow any entity, for example `media_player.xbox`. Set it up in the section **Source entity** when creating the stopwatch or later via **Configure**:
@@ -108,7 +110,7 @@ The elapsed time sensor reports whole seconds, e.g. `163 s`. Some options for a 
 
 - **Display unit:** open the sensor, then the settings (gear icon), and set the display unit to *minutes*. Home Assistant then shows the time as a duration, e.g. `2 min 43 s`. This only changes the display; automations still see seconds.
 - **Formatted attribute:** the attribute `elapsed_formatted` contains the time as `HH:MM:SS`, from 24 hours on as `d.HH:MM:SS` (e.g. `00:02:43`, `1.02:03:04`). Cards that can show an attribute can use it directly. It is updated together with the sensor (see the update interval) and is not stored in the database.
-- **Notifications:** every event carries the same formatted value, calculated at the moment of the event, so it can be passed on without a template filter:
+- **Notifications:** every event carries the same formatted value, calculated at the moment of the event, so it can be passed on without a template filter. With the device trigger *Interval reached* the automation is set up in the editor without YAML; written by hand with an event trigger it looks like this:
 
 ```yaml
 triggers:
