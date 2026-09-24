@@ -147,10 +147,14 @@ pyproject.toml (pytest and Ruff settings), requirements_test*.txt
 
 Automated tests with `pytest-homeassistant-custom-component` run on every push against the minimum (2026.1) and the latest Home Assistant; Ruff checks linting and formatting.
 
+## Brand images
+
+Icon and logo are shipped with the integration in `custom_components/stopwatch_plus/brand/` (supported since Home Assistant 2026.3; older versions simply show no icon). Files: `icon.png` (256×256), `icon@2x.png` (512×512), `logo.png` (height 128), `logo@2x.png` (height 256), each with a `dark_` variant. Design: stopwatch with a plus on its face; indigo body, amber plus (`#4F46E5` / `#F59E0B`, dark theme `#818CF8` / `#FBBF24`), wordmark in Readex Pro SemiBold (600). Sources and generator: `docs/brand/` (`python docs/brand/generate.py <ReadexPro-SemiBold.ttf>`). The HACS validation finds the local `brand/icon.png`, so the brands check is no longer skipped.
+
 ## Translations
 
 Custom integrations read their texts from `translations/<language>.json`; `translations/en.json` is the source of truth. There is no `strings.json` (that file is only used by core integrations).
 
 ## Open points
 
-- Icon / branding for the HACS store (at the first release).
+- Check at the first release whether HACS shows the bundled icon in its store view.

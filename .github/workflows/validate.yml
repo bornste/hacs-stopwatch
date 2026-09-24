@@ -27,5 +27,3 @@ jobs:
         uses: hacs/action@main
         with:
           category: integration
-          # The brand icon is added at the first release.
-          ignore: brands
