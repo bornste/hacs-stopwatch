@@ -35,3 +35,11 @@ template:
         unique_id: fake_console
         state: "{{ states('input_select.fake_console_state') }}"
         availability: "{{ is_state('input_boolean.fake_console_unavailable', 'off') }}"
+
+panel_custom:
+  - name: panel_develop
+    sidebar_title: Developer Tools
+    sidebar_icon: mdi:hammer
+    url_path: "config/developer-tools/state"
+    module_url: /api/hassio/app/entrypoint.js
+    embed_iframe: true

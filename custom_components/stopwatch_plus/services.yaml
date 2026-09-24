@@ -1,27 +1,21 @@
+# The entity filter also limits the device and area choices of the target picker
+# to those with Stopwatch Plus entities.
 start:
   target:
     entity:
-      integration: stopwatch_plus
-    device:
       integration: stopwatch_plus
 
 pause:
   target:
     entity:
       integration: stopwatch_plus
-    device:
-      integration: stopwatch_plus
 
 reset:
   target:
     entity:
       integration: stopwatch_plus
-    device:
-      integration: stopwatch_plus
 
 toggle:
   target:
     entity:
-      integration: stopwatch_plus
-    device:
       integration: stopwatch_plus
