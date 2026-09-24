@@ -1,12 +1,22 @@
 # Stopwatch Plus for Home Assistant
 
-> **Status:** in development – not yet ready for use.
+The stopwatch with the plus – in case Home Assistant adds its own one day.
+
+[![Tests](https://github.com/bornste/hacs-stopwatch/actions/workflows/tests.yml/badge.svg)](https://github.com/bornste/hacs-stopwatch/actions/workflows/tests.yml)
+[![Validate](https://github.com/bornste/hacs-stopwatch/actions/workflows/validate.yml/badge.svg)](https://github.com/bornste/hacs-stopwatch/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/bornste/hacs-stopwatch?include_prereleases&sort=semver)](https://github.com/bornste/hacs-stopwatch/releases)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![Home Assistant](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbornste%2Fhacs-stopwatch%2Fmain%2Fhacs.json&query=%24.homeassistant&label=Home%20Assistant&suffix=%2B&color=41BDF5&logo=homeassistant&logoColor=white)](https://www.home-assistant.io/)
+[![License](https://img.shields.io/github/license/bornste/hacs-stopwatch)](LICENSE)
+
+> [!WARNING]
+> In development – not yet ready for use.
 
 A stopwatch integration for [Home Assistant](https://www.home-assistant.io/) that counts **up**, can be paused and resumed, and fires events at configurable intervals of running time. Home Assistant's built-in `timer` only counts down; Stopwatch Plus fills that gap.
 
 ## Planned features
 
-- Any number of stopwatches, each set up as its own device (e.g. "Gaming", "Work time").
+- Any number of stopwatches, each set up as its own device (e.g. "Gaming", "Work time", "TV on").
 - Actions `stopwatch_plus.start` (also resumes), `stopwatch_plus.pause`, `stopwatch_plus.reset` and `stopwatch_plus.toggle`, plus buttons for each stopwatch.
 - A duration sensor with the elapsed time, and a status sensor (`idle`, `running`, `paused`).
 - Optional binding to a source entity: the stopwatch runs while that entity is in one of the chosen states (e.g. `media_player.xbox` is `playing`) and pauses otherwise.
@@ -14,6 +24,24 @@ A stopwatch integration for [Home Assistant](https://www.home-assistant.io/) tha
 - State survives Home Assistant restarts.
 - Configurable sensor update interval to keep the database small, with a bundled dashboard card that counts live in the browser.
 - English and German translations.
+
+## How it works
+
+A stopwatch is always in one of three states. Every change fires a `stopwatch_plus_event` whose `type` is shown in brackets:
+
+```mermaid
+stateDiagram-v2
+    direction LR
+    [*] --> idle
+    idle --> running: start (event started)
+    running --> paused: pause (event paused)
+    paused --> running: start (event resumed)
+    running --> idle: reset (event reset)
+    paused --> idle: reset (event reset)
+    running --> running: interval reached (event interval)
+```
+
+Only running time counts: pauses are not added to the elapsed time, and interval events fire after every full interval of running time.
 
 ## Why the domain is `stopwatch_plus`
 
@@ -23,7 +51,28 @@ The obvious domain would be `stopwatch`. It is deliberately **not** used: if Hom
 
 ## Installation
 
-Coming soon via [HACS](https://hacs.xyz/).
+### With HACS (recommended)
+
+[![Open your Home Assistant instance and open this repository in HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=bornste&repository=hacs-stopwatch&category=integration)
+
+Stopwatch Plus is not in the default HACS store yet. Until then, add it as a custom repository:
+
+1. In Home Assistant, open **HACS**, then the menu (three dots, top right) → **Custom repositories**.
+2. Enter `https://github.com/bornste/hacs-stopwatch`, choose the type **Integration** and select **Add**.
+3. Search for **Stopwatch Plus** in HACS, open it and select **Download**.
+4. Restart Home Assistant.
+
+The button above does steps 1 and 2 for you.
+
+### Manually
+
+Copy the folder `custom_components/stopwatch_plus` of this repository into the `custom_components` folder of your Home Assistant configuration and restart Home Assistant.
+
+### Set up a stopwatch
+
+[![Open your Home Assistant instance and start setting up Stopwatch Plus.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=stopwatch_plus)
+
+Go to **Settings → Devices & services → Add integration**, search for **Stopwatch Plus** and enter a name (e.g. "Gaming"). Repeat for every stopwatch you need; each one becomes its own device. Interval and update interval can be changed later via **Configure**.
 
 ## Displaying the elapsed time
 
