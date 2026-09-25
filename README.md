@@ -32,13 +32,13 @@ A stopwatch integration for [Home Assistant](https://www.home-assistant.io/) tha
 - **Interval events** based on running time only (pauses do not count) – for example to announce "You have been playing for 60 minutes".
 - **Automation triggers without typing:** every event is available as a device trigger and via the event entity in the trigger *Event received*.
 - **Survives restarts:** the state is kept when Home Assistant restarts; a running stopwatch keeps counting.
-- **Database-friendly:** the sensor update interval is configurable (default 60 seconds).
+- **Dashboard card and tile feature** that count live in the browser, every second, with the controls – included, no extra installation.
+- **Database-friendly:** the sensor update interval is configurable (default 60 seconds); the card counts live anyway.
 - **Translations:** English and German. Contributions are welcome: copy [`en.json`](custom_components/stopwatch_plus/translations/en.json), translate it, save it as `<language code>.json` (e.g. `fr.json`) and open a pull request.
 - Icon and logo in light and dark.
 
 ## Roadmap
 
-- A bundled dashboard card that counts live in the browser, independent of the sensor update interval.
 - Inclusion in the default HACS store.
 
 ## How it works
@@ -120,9 +120,43 @@ Copy the folder `custom_components/stopwatch_plus` of this repository into the `
 
 Go to **Settings → Devices & services → Add integration**, search for **Stopwatch Plus** and enter a name (e.g. "Gaming"). Repeat for every stopwatch you need; each one becomes its own device. Interval and update interval can be changed later via **Configure**.
 
+## Dashboard card
+
+![Stopwatch Plus card in the standard and compact layout, and the tile card feature](https://raw.githubusercontent.com/bornste/hacs-stopwatch/main/docs/images/card-preview.png)
+
+Stopwatch Plus brings its own dashboard card. It is loaded automatically – no resource has to be added. It counts live in the browser every second, whatever the sensor update interval, and has buttons for Start/Pause, Stop and Reset.
+
+In the dashboard editor, choose **Add card → Stopwatch Plus** and select a stopwatch. Everything can be set in the visual editor; in YAML:
+
+```yaml
+type: custom:stopwatch-plus-card
+entity: sensor.gaming_elapsed_time  # any entity of the stopwatch
+name: Gaming                        # optional, default: the name of the stopwatch
+layout: standard                    # standard (default) or compact
+hide_status: false
+hide_controls: false
+hide_last_session: false
+```
+
+- **Standard:** name and status, the running time in large digits, the buttons and the last session.
+- **Compact:** one row with name, status, time and a Start/Pause button – e.g. for a list of stopwatches.
+
+**Tile card feature:** a [tile card](https://www.home-assistant.io/dashboards/tile/) of any stopwatch entity can show the live time and the buttons as a feature. In the tile card editor, choose **Features → Add feature → Stopwatch Plus controls**; in YAML:
+
+```yaml
+type: tile
+entity: sensor.gaming_status
+features:
+  - type: custom:stopwatch-plus-controls
+    hide_time: false
+    buttons: [toggle, stop, reset]  # any of them, in this order
+```
+
+Tapping the name or the time opens the details of the elapsed time sensor. After an update of Stopwatch Plus, reload the dashboard once (or clear the browser cache) if the card still looks like the old version.
+
 ## Displaying the elapsed time
 
-The elapsed time sensor reports whole seconds, e.g. `163 s`. Some options for a nicer display:
+Besides the card, the elapsed time sensor can be shown like any other sensor. It reports whole seconds, e.g. `163 s`. Some options for a nicer display:
 
 - **Display unit:** open the sensor, then the settings (gear icon), and set the display unit to *minutes*. Home Assistant then shows the time as a duration, e.g. `2 min 43 s`. This only changes the display; automations still see seconds.
 - **Formatted attribute:** the attribute `elapsed_formatted` contains the time as `HH:MM:SS`, from 24 hours on as `d.HH:MM:SS` (e.g. `00:02:43`, `1.02:03:04`). Cards that can show an attribute can use it directly. It is updated together with the sensor (see the update interval) and is not stored in the database.

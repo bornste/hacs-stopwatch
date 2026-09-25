@@ -30,6 +30,10 @@ The first start takes a few minutes. Open http://localhost:8123 and create a loc
 
 Python and translation changes require a restart of Home Assistant: Settings → System → Restart (top right), or `Ctrl+C` in the terminal and `bash scripts/develop` again.
 
+### Dashboard card
+
+The card lives in `custom_components/stopwatch_plus/www/stopwatch-plus-card.js` (plain JavaScript, no build step). Changes to it need no restart: the file is served straight from disk, so a reload of the browser page (Ctrl+F5) is enough. Errors show up in the browser console (F12).
+
 ### Automated tests
 
 ```bash

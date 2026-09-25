@@ -11,7 +11,7 @@ Last updated: 2026-09-24. Repository: https://github.com/bornste/hacs-stopwatch 
 | Elapsed state | Sensor, numeric in seconds, `device_class: duration` |
 | Update interval | Configurable in the options; default **60 s** |
 | Integration type | `service` – stopwatches are listed under Settings → Devices & services → Integrations, one device per stopwatch; not a helper, so they do not fill up the helper list |
-| Live display | Attributes allow client-side counting; a dashboard card bundled with the integration (phase 2) |
+| Live display | Attributes allow client-side counting; a dashboard card and a tile card feature bundled with the integration (see below) |
 | Home Assistant restart | State is restored; if the stopwatch was running, the downtime is counted |
 | Source entity | Optional: an entity plus the states that count as "running" (e.g. `media_player.xbox` = `playing`) → start/resume and pause automatically |
 | Auto-stop | Optional (on/off) with a configurable inactivity delay (see below) |
@@ -126,6 +126,15 @@ Name; optional source entity and the states that count as "running"; grace perio
 
 Same principle as the core `timer`: the state changes rarely and the frontend does the counting. Attributes `accumulated_seconds` (total up to the last start) + `running_since` (time of the last start) → display = `accumulated_seconds + (now − running_since)`. A small dashboard card (JavaScript) reads these attributes and counts every second in the browser. The integration ships the card and registers it itself; no separate HACS installation required.
 
+### Dashboard card and tile feature
+
+- One file, `custom_components/stopwatch_plus/www/stopwatch-plus-card.js`, plain JavaScript (web components, no build step, no dependencies besides the elements of the Home Assistant frontend such as `ha-card` and `ha-icon`).
+- The integration serves the folder under `/stopwatch_plus_frontend/` and adds the file with `frontend.add_extra_js_url` (URL with `?v=<version>` so browsers load a new version). `frontend` and `http` are `after_dependencies`; without them (tests, minimal setups) nothing is registered.
+- The elements are defined only after the frontend has started (`home-assistant` defined): the frontend replaces `window.customElements` with a scoped registry polyfill, and elements defined earlier would not be found ("Custom element doesn't exist").
+- Card `custom:stopwatch-plus-card`: options `entity` (any entity of a stopwatch; the elapsed time and last session sensors are found via the device and the translation keys `elapsed` / `last_session`), `name`, `layout` (`standard` / `compact`), `hide_status`, `hide_controls`, `hide_last_session`. Visual editor via `getConfigForm`, card picker entry, stub config with the first stopwatch. Buttons call the actions `stopwatch_plus.toggle`, `stop` and `reset`; Stop and Reset are disabled while idle.
+- Tile card feature `custom:stopwatch-plus-controls` for any stopwatch entity: options `hide_time` and `buttons` (subset of `toggle`, `stop`, `reset`).
+- Texts in English and German (from the user language), statuses via the entity translations.
+
 ## Database note
 
 An integration cannot exclude its own states from the recorder. With 1 s updates, Home Assistant would write about 3600 rows per hour of running time. Hence infrequent updates by default and the live display via the card; the README also documents `recorder: exclude:`.
@@ -138,7 +147,7 @@ custom_components/stopwatch_plus/
   stopwatch.py (state logic), entity.py, sensor.py, button.py,
   services.py, services.yaml, device_trigger.py,
   translations/en.json, translations/de.json,
-  frontend/stopwatch-card.js (phase 2)
+  frontend.py, www/stopwatch-plus-card.js (dashboard card and tile feature)
 docs/hacs-stopwatch-spec.md, docs/development.md
 scripts/setup, scripts/develop (local development instance in WSL)
 dev/configuration.yaml (configuration of the development instance)
@@ -156,7 +165,7 @@ CHANGELOG.md
 1. **Manual stopwatch** – done: state logic with restore, sensors, buttons, actions, events incl. intervals, config and options flow (name, interval, update interval), tests for the minimum and the latest Home Assistant. After the first test: intervals in seconds, integration instead of helper.
 2. **Source entity** – done: binding with running states, grace period with backdated pause, auto-reset for new sessions (changed to auto-stop in 0.3.0), persisted across restarts; settings in a collapsible "Source entity" section of the config and options flow.
 3. **Device triggers** – done: one device trigger per event type (`started`, `paused`, `resumed`, `stopped`, `reset`, `interval`), based on `stopwatch_plus_event` filtered by `device_id` and `type`; translated names in English and German.
-4. Dashboard card with live counting.
+4. **Dashboard card** – done: card with standard and compact layout, visual editor and tile card feature, counting live in the browser; shipped and registered by the integration.
 5. Icon, first release v0.1.0, submission to HACS.
 
 ## Quality

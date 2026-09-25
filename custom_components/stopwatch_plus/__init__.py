@@ -24,6 +24,7 @@ from .const import (
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
 )
+from .frontend import async_setup_frontend
 from .services import async_setup_services
 from .source import SourceBinding
 from .stopwatch import Stopwatch
@@ -36,8 +37,9 @@ type StopwatchConfigEntry = ConfigEntry[Stopwatch]
 
 
 async def async_setup(hass: HomeAssistant, config: ConfigType) -> bool:
-    """Set up the actions of the integration."""
+    """Set up the actions and the dashboard card of the integration."""
     async_setup_services(hass)
+    await async_setup_frontend(hass)
     return True
 
 
