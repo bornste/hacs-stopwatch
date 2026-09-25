@@ -14,7 +14,7 @@ Last updated: 2026-09-24. Repository: https://github.com/bornste/hacs-stopwatch 
 | Live display | Attributes allow client-side counting; a dashboard card bundled with the integration (phase 2) |
 | Home Assistant restart | State is restored; if the stopwatch was running, the downtime is counted |
 | Source entity | Optional: an entity plus the states that count as "running" (e.g. `media_player.xbox` = `playing`) → start/resume and pause automatically |
-| Auto-reset | Optional (on/off) with a configurable inactivity delay (see below) |
+| Auto-stop | Optional (on/off) with a configurable inactivity delay (see below) |
 | Unavailable source | Grace period before the stopwatch reacts (see below) |
 | Interval events | Configurable interval of running time (pauses do not count), with second precision |
 | Triggers | One event type with a `type` field, exposed as separate device triggers (see below) |
@@ -40,6 +40,7 @@ Entity IDs are derived from the English entity names, whatever the language of t
 
 - `sensor.<name>_elapsed_time` – elapsed running time (seconds, duration, display precision 0). Attributes: `elapsed_formatted`, `status`, `started_at`, `running_since`, `accumulated_seconds`, `interval_count`. `elapsed_formatted` is excluded from the recorder (it is derived from the state).
 - `sensor.<name>_status` – enum: `idle` / `running` / `paused` (translated).
+- `sensor.<name>_last_session` – running time of the last session (seconds, duration, display precision 0), `unknown` until a first session ended. Set whenever a time above 0 goes back to zero (stop, reset, auto-stop); pausing does not change it. Attributes: `elapsed_formatted` (not recorded), `ended_at`. Persisted with the state.
 - `button.<name>_start` – starts or resumes.
 - `button.<name>_pause`
 - `button.<name>_stop` – stops and sets back to zero (`idle`).
@@ -77,16 +78,16 @@ Some sources (e.g. Xbox) briefly report `unavailable` or `unknown` while still i
 - If the grace period expires, or the source returns to a non-running state → pause, backdated to the moment the source became unavailable (the unavailable time is not counted).
 - Grace period configurable, default 2 minutes, at most 1 hour. 0 turns it off: `unavailable` / `unknown` then pause immediately, like any other non-running state.
 
-### Auto-reset
+### Auto-stop
 
-- Option on/off (default: off) and inactivity delay (default: 30 minutes, at most 7 days). A delay of 0 makes every new start of the source a new session.
-- When the source becomes inactive (non-running, or unavailable beyond the grace period), the inactivity time starts.
-- If the source becomes "running" again **after** the delay has passed, the stopwatch is reset and then started – a new session.
-- If it becomes "running" again **before** the delay has passed, the stopwatch simply resumes – same session.
-- The reset happens only at the start of the next session, so the time of the last session stays visible until then.
+- Option on/off (default: off) and inactivity delay (default: 30 minutes, at most 7 days).
+- When the source becomes inactive (non-running, or unavailable beyond the grace period), the inactivity time starts; for a dropout it counts from the start of the dropout, like the backdated pause. A source that turns off and then becomes unavailable stays inactive.
+- If the source stays inactive for the delay, the session ends: the stopwatch is stopped (event `stopped`, source `auto_stop`), its time goes to the last session sensor, and the next start of the source fires `started`.
+- If the source becomes "running" again **before** the delay has passed, the stopwatch simply resumes – same session.
+- A delay of 0 stops the stopwatch as soon as the source becomes inactive (a `paused` event directly followed by `stopped`).
 - Only applies when a source entity is configured.
-- Only applies when the stopwatch is paused at that moment; a stopwatch started by hand in the meantime is not reset.
-- The inactivity start and a running grace period are persisted, so both survive a restart of Home Assistant.
+- Only applies when the stopwatch is still paused at the deadline; a stopwatch started by hand in the meantime keeps running.
+- The inactivity start and a running grace period are persisted, so both survive a restart of Home Assistant. A deadline that passed while Home Assistant was down stops the stopwatch right after the start.
 
 ## Events and triggers
 
@@ -97,11 +98,11 @@ One event type on the Home Assistant event bus: `stopwatch_plus_event`.
 | `started` | Started from `idle` |
 | `paused` | Paused |
 | `resumed` | Resumed from `paused` |
-| `stopped` | Stopped and set back to zero |
-| `reset` | Set back to zero (manually or by auto-reset); a running stopwatch keeps running |
+| `stopped` | Stopped and set back to zero (manually or by auto-stop) |
+| `reset` | Set back to zero; a running stopwatch keeps running |
 | `interval` | An interval of running time has been reached |
 
-Event data: `type`, `entity_id`, `device_id`, `name`, `elapsed_seconds`, `elapsed_formatted` (see below), `interval_count`, `source` (`action`, `button`, `source_entity`, `auto_reset`; `null` for `interval` events). For `interval` events, `elapsed_seconds` is the exact threshold (e.g. 3600), not the slightly later firing time.
+Event data: `type`, `entity_id`, `device_id`, `name`, `elapsed_seconds`, `elapsed_formatted` (see below), `interval_count`, `source` (`action`, `button`, `source_entity`, `auto_stop`; `null` for `interval` events). For `interval` events, `elapsed_seconds` is the exact threshold (e.g. 3600), not the slightly later firing time. For `stopped` and `reset` events, `elapsed_seconds`, `elapsed_formatted` and `interval_count` are the values the session reached before going back to zero.
 
 Each `type` is also available as its own device trigger in the automation editor ("Stopwatch started", "Interval reached", …). Interval events fire at the exact moment, independent of the sensor update interval. A state trigger on the status sensor remains possible as a generic alternative.
 
@@ -119,7 +120,7 @@ The attribute is updated together with the sensor state (update interval); event
 
 ## Setup (config flow / options)
 
-Name; optional source entity and the states that count as "running"; grace period for unavailable source; auto-reset on/off and delay; interval (0 = off, max. 24 h); sensor update interval (1 s – 1 h). Both are entered with Home Assistant's duration field (hours, minutes, seconds) and stored in seconds. Everything except the name can be changed later via "Configure" (options flow); saving the options reloads the stopwatch. The state is stored per stopwatch in Home Assistant's `.storage` folder and deleted when the stopwatch is removed.
+Name; optional source entity and the states that count as "running"; grace period for unavailable source; auto-stop on/off and delay; interval (0 = off, max. 24 h); sensor update interval (1 s – 1 h). Both are entered with Home Assistant's duration field (hours, minutes, seconds) and stored in seconds. Everything except the name can be changed later via "Configure" (options flow); saving the options reloads the stopwatch. The state is stored per stopwatch in Home Assistant's `.storage` folder and deleted when the stopwatch is removed.
 
 ## Live display with infrequent sensor updates
 
@@ -153,7 +154,7 @@ CHANGELOG.md
 ## Milestones
 
 1. **Manual stopwatch** – done: state logic with restore, sensors, buttons, actions, events incl. intervals, config and options flow (name, interval, update interval), tests for the minimum and the latest Home Assistant. After the first test: intervals in seconds, integration instead of helper.
-2. **Source entity** – done: binding with running states, grace period with backdated pause, auto-reset for new sessions, persisted across restarts; settings in a collapsible "Source entity" section of the config and options flow.
+2. **Source entity** – done: binding with running states, grace period with backdated pause, auto-reset for new sessions (changed to auto-stop in 0.3.0), persisted across restarts; settings in a collapsible "Source entity" section of the config and options flow.
 3. **Device triggers** – done: one device trigger per event type (`started`, `paused`, `resumed`, `stopped`, `reset`, `interval`), based on `stopwatch_plus_event` filtered by `device_id` and `type`; translated names in English and German.
 4. Dashboard card with live counting.
 5. Icon, first release v0.1.0, submission to HACS.
@@ -164,7 +165,7 @@ Automated tests with `pytest-homeassistant-custom-component` run on every push a
 
 ## Brand images
 
-Icon and logo are shipped with the integration in `custom_components/stopwatch_plus/brand/` (supported since Home Assistant 2026.3; older versions simply show no icon). Files: `icon.png` (256×256), `icon@2x.png` (512×512), `logo.png` (height 128), `logo@2x.png` (height 256), each with a `dark_` variant. Design: stopwatch with a plus on its face; indigo body, amber plus (`#4F46E5` / `#F59E0B`, dark theme `#818CF8` / `#FBBF24`), wordmark in Readex Pro SemiBold (600). Sources and generator: `docs/brand/` (`python docs/brand/generate.py <ReadexPro-SemiBold.ttf>`). The HACS validation finds the local `brand/icon.png`, so the brands check is no longer skipped.
+Icon and logo are shipped with the integration in `custom_components/stopwatch_plus/brand/` (supported since Home Assistant 2026.3; older versions simply show no icon). Files: `icon.png` (256×256), `icon@2x.png` (512×512), `logo.png` (height 128), `logo@2x.png` (height 256), each with a `dark_` variant. Design: stopwatch with a plus on its face; indigo body, amber plus (`#4F46E5` / `#F59E0B`, dark theme `#818CF8` / `#FBBF24`), wordmark in Readex Pro SemiBold (600). Sources and generator: `docs/brand/` (`python docs/brand/generate.py <ReadexPro-SemiBold.ttf>`). The same script writes the GitHub social preview `docs/brand/social-preview.png` (1280×640, content at least 80 px from the edges), uploaded by hand under Settings → General → Social preview. The HACS validation finds the local `brand/icon.png`, so the brands check is no longer skipped.
 
 ## Translations
 

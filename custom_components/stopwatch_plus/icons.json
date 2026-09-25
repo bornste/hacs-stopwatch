@@ -28,6 +28,9 @@
           "running": "mdi:timer-play-outline",
           "paused": "mdi:timer-pause-outline"
         }
+      },
+      "last_session": {
+        "default": "mdi:history"
       }
     },
     "event": {

@@ -4,6 +4,17 @@ All notable changes to Stopwatch Plus are documented here. The format follows [K
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-09-25
+
+### Added
+
+- Sensor *Last session* per stopwatch (e.g. `sensor.gaming_last_session`): the running time of the last session, kept when the stopwatch goes back to zero by Stop, Reset or auto-stop. Attributes `elapsed_formatted` and `ended_at`; survives restarts.
+
+### Changed
+
+- **Breaking:** the option *Reset automatically for a new session* is now **Stop automatically after inactivity**. When the source stays inactive for the delay, the stopwatch is stopped right away (event `stopped` with source `auto_stop`) instead of being reset at the next start of the source. The next start fires `started`. With a delay of 0, the stopwatch stops as soon as the source becomes inactive. The option keys are now `auto_stop` and `auto_stop_delay`: stopwatches set up with 0.2.0 need the option switched on again.
+- The events `stopped` and `reset` report the time and interval count the session reached, instead of 0.
+
 ## [0.2.0] - 2026-09-25
 
 ### Added
@@ -36,6 +47,7 @@ First pre-release.
 - English and German translations.
 - Icon and logo, light and dark (shown from Home Assistant 2026.3 on).
 
-[Unreleased]: https://github.com/bornste/hacs-stopwatch/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/bornste/hacs-stopwatch/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/bornste/hacs-stopwatch/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/bornste/hacs-stopwatch/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bornste/hacs-stopwatch/releases/tag/v0.1.0

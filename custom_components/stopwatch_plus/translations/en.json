@@ -22,15 +22,15 @@
               "source_entity": "Source entity",
               "running_states": "Running states",
               "grace_period": "Grace period when unavailable",
-              "auto_reset": "Reset automatically for a new session",
-              "auto_reset_delay": "Inactivity before a new session"
+              "auto_stop": "Stop automatically after inactivity",
+              "auto_stop_delay": "Inactivity before stopping"
             },
             "data_description": {
               "source_entity": "Leave empty to control the stopwatch only with buttons, actions and automations.",
               "running_states": "States of the source entity in which the stopwatch runs, e.g. \"playing\" or \"on\". You can type your own.",
               "grace_period": "If the source is unavailable or unknown for longer than this, the stopwatch pauses, backdated to the start of the dropout. 0 turns the grace period off: unavailable then pauses right away like any other non-running state. At most 1 hour.",
-              "auto_reset": "When the source starts running again after a long inactivity, the stopwatch is reset first.",
-              "auto_reset_delay": "How long the source must be inactive for its next start to count as a new session, at most 7 days. 0: every new start of the source begins a new session."
+              "auto_stop": "When the source stays inactive for the delay below, the session ends: the stopwatch is stopped and set back to zero. The time of the session remains in the sensor \"Last session\". The next start of the source begins a new session.",
+              "auto_stop_delay": "How long the source must be inactive before the stopwatch is stopped, at most 7 days. 0: the stopwatch stops as soon as the source becomes inactive."
             }
           }
         }
@@ -41,7 +41,7 @@
       "update_interval_out_of_range": "The update interval must be between 1 second and 1 hour.",
       "running_states_required": "Select at least one running state for the source entity.",
       "grace_period_too_long": "The grace period can be at most 1 hour.",
-      "auto_reset_delay_too_long": "The inactivity before a new session can be at most 7 days."
+      "auto_stop_delay_too_long": "The inactivity before stopping can be at most 7 days."
     }
   },
   "options": {
@@ -64,15 +64,15 @@
               "source_entity": "Source entity",
               "running_states": "Running states",
               "grace_period": "Grace period when unavailable",
-              "auto_reset": "Reset automatically for a new session",
-              "auto_reset_delay": "Inactivity before a new session"
+              "auto_stop": "Stop automatically after inactivity",
+              "auto_stop_delay": "Inactivity before stopping"
             },
             "data_description": {
               "source_entity": "Leave empty to control the stopwatch only with buttons, actions and automations.",
               "running_states": "States of the source entity in which the stopwatch runs, e.g. \"playing\" or \"on\". You can type your own.",
               "grace_period": "If the source is unavailable or unknown for longer than this, the stopwatch pauses, backdated to the start of the dropout. 0 turns the grace period off: unavailable then pauses right away like any other non-running state. At most 1 hour.",
-              "auto_reset": "When the source starts running again after a long inactivity, the stopwatch is reset first.",
-              "auto_reset_delay": "How long the source must be inactive for its next start to count as a new session, at most 7 days. 0: every new start of the source begins a new session."
+              "auto_stop": "When the source stays inactive for the delay below, the session ends: the stopwatch is stopped and set back to zero. The time of the session remains in the sensor \"Last session\". The next start of the source begins a new session.",
+              "auto_stop_delay": "How long the source must be inactive before the stopwatch is stopped, at most 7 days. 0: the stopwatch stops as soon as the source becomes inactive."
             }
           }
         }
@@ -83,7 +83,7 @@
       "update_interval_out_of_range": "The update interval must be between 1 second and 1 hour.",
       "running_states_required": "Select at least one running state for the source entity.",
       "grace_period_too_long": "The grace period can be at most 1 hour.",
-      "auto_reset_delay_too_long": "The inactivity before a new session can be at most 7 days."
+      "auto_stop_delay_too_long": "The inactivity before stopping can be at most 7 days."
     }
   },
   "entity": {
@@ -140,6 +140,17 @@
           "running": "Running",
           "paused": "Paused"
         }
+      },
+      "last_session": {
+        "name": "Last session",
+        "state_attributes": {
+          "elapsed_formatted": {
+            "name": "Last session (formatted)"
+          },
+          "ended_at": {
+            "name": "Ended at"
+          }
+        }
       }
     },
     "event": {
@@ -171,7 +182,7 @@
               "action": "Action",
               "button": "Button",
               "source_entity": "Source entity",
-              "auto_reset": "Auto-reset"
+              "auto_stop": "Auto-stop"
             }
           }
         }

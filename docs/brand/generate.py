@@ -5,8 +5,8 @@ Usage, from the repository root:
     pip install cairosvg pillow
     python docs/brand/generate.py path/to/ReadexPro-SemiBold.ttf
 
-The icon SVGs in docs/brand are written as well; the PNG files go to
-custom_components/stopwatch_plus/brand. Readex Pro (weight 600, SemiBold) is available
+The icon SVGs and the social preview for GitHub (social-preview.png, 1280x640) are
+written to docs/brand; the other PNG files go to custom_components/stopwatch_plus/brand. Readex Pro (weight 600, SemiBold) is available
 from Google Fonts.
 """
 
@@ -91,6 +91,43 @@ def logo(colors: dict[str, str], font_path: str, height: int) -> Image.Image:
     return image.resize((round(image.width / scale), height), Image.LANCZOS)
 
 
+def social_preview(font_path: str) -> Image.Image:
+    """Return the social preview image for GitHub (Open Graph), 1280x640.
+
+    GitHub's template asks for a border of 40 pt. Everything stays at least 80 px
+    from the edges, which fits that border at any pixel density.
+    """
+    width, height, margin = 1280, 640, 80
+    colors = palette(dark=False)
+    image = Image.new("RGBA", (width, height), "#EEF2FF")
+    draw = ImageDraw.Draw(image)
+    # Accent bar at the bottom edge in the brand colors
+    draw.rectangle((0, height - 16, width * 0.8, height), fill=colors["body"])
+    draw.rectangle((width * 0.8, height - 16, width, height), fill=colors["accent"])
+
+    mark = logo(colors, font_path, 200)
+    max_width = width - 2 * margin
+    if mark.width > max_width:
+        mark = mark.resize(
+            (max_width, round(mark.height * max_width / mark.width)), Image.LANCZOS
+        )
+
+    font = ImageFont.truetype(font_path, 44)
+    tagline = "A count-up stopwatch for Home Assistant"
+    text_height = 44
+    gap = 56
+    top = (height - (mark.height + gap + text_height)) // 2
+    image.paste(mark, ((width - mark.width) // 2, top), mark)
+    draw.text(
+        (width // 2, top + mark.height + gap + text_height // 2),
+        tagline,
+        fill="#4B5563",
+        font=font,
+        anchor="mm",
+    )
+    return image.convert("RGB")
+
+
 def main(font_path: str) -> None:
     """Write all SVG and PNG files."""
     PNG_DIR.mkdir(parents=True, exist_ok=True)
@@ -108,6 +145,10 @@ def main(font_path: str) -> None:
         for name, image in images.items():
             image.save(PNG_DIR / name, optimize=True)
             print(name, image.size)
+
+    preview = social_preview(font_path)
+    preview.save(SVG_DIR / "social-preview.png", optimize=True)
+    print("social-preview.png", preview.size)
 
 
 if __name__ == "__main__":

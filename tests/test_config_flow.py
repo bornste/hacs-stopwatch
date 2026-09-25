@@ -8,8 +8,8 @@ import pytest
 from pytest_homeassistant_custom_component.common import MockConfigEntry
 
 from custom_components.stopwatch_plus.const import (
-    CONF_AUTO_RESET,
-    CONF_AUTO_RESET_DELAY,
+    CONF_AUTO_STOP,
+    CONF_AUTO_STOP_DELAY,
     CONF_GRACE_PERIOD,
     CONF_INTERVAL,
     CONF_RUNNING_STATES,
@@ -24,8 +24,8 @@ from homeassistant.data_entry_flow import FlowResultType
 DEFAULT_SOURCE_OPTIONS = {
     CONF_RUNNING_STATES: ["playing", "on"],
     CONF_GRACE_PERIOD: 120,
-    CONF_AUTO_RESET: False,
-    CONF_AUTO_RESET_DELAY: 1800,
+    CONF_AUTO_STOP: False,
+    CONF_AUTO_STOP_DELAY: 1800,
 }
 
 
@@ -79,8 +79,8 @@ async def test_create_stopwatch_with_source(hass: HomeAssistant) -> None:
                 CONF_SOURCE_ENTITY: "media_player.xbox",
                 CONF_RUNNING_STATES: ["playing", " gaming "],
                 CONF_GRACE_PERIOD: _duration(minutes=5),
-                CONF_AUTO_RESET: True,
-                CONF_AUTO_RESET_DELAY: _duration(hours=1),
+                CONF_AUTO_STOP: True,
+                CONF_AUTO_STOP_DELAY: _duration(hours=1),
             },
         },
     )
@@ -92,8 +92,8 @@ async def test_create_stopwatch_with_source(hass: HomeAssistant) -> None:
         CONF_SOURCE_ENTITY: "media_player.xbox",
         CONF_RUNNING_STATES: ["playing", "gaming"],
         CONF_GRACE_PERIOD: 300,
-        CONF_AUTO_RESET: True,
-        CONF_AUTO_RESET_DELAY: 3600,
+        CONF_AUTO_STOP: True,
+        CONF_AUTO_STOP_DELAY: 3600,
     }
 
 
@@ -124,8 +124,8 @@ async def test_invalid_durations_show_errors(hass: HomeAssistant) -> None:
         ),
         ({CONF_GRACE_PERIOD: _duration(hours=2)}, "grace_period_too_long"),
         (
-            {CONF_AUTO_RESET_DELAY: _duration(hours=7 * 24 + 1)},
-            "auto_reset_delay_too_long",
+            {CONF_AUTO_STOP_DELAY: _duration(hours=7 * 24 + 1)},
+            "auto_stop_delay_too_long",
         ),
     ],
 )

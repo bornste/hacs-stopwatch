@@ -13,8 +13,8 @@ from pytest_homeassistant_custom_component.common import (
 )
 
 from custom_components.stopwatch_plus.const import (
-    CONF_AUTO_RESET,
-    CONF_AUTO_RESET_DELAY,
+    CONF_AUTO_STOP,
+    CONF_AUTO_STOP_DELAY,
     CONF_GRACE_PERIOD,
     CONF_INTERVAL,
     CONF_RUNNING_STATES,
@@ -24,22 +24,22 @@ from custom_components.stopwatch_plus.const import (
 from homeassistant.const import STATE_UNAVAILABLE
 from homeassistant.core import Event, HomeAssistant
 
-from .conftest import ELAPSED, PAUSE, START, STATUS
+from .conftest import ELAPSED, LAST_SESSION, PAUSE, START, STATUS
 
 XBOX = "media_player.xbox"
 
 
 @pytest.fixture
 def options() -> dict[str, Any]:
-    """A stopwatch bound to the Xbox, with auto-reset after 30 minutes."""
+    """A stopwatch bound to the Xbox, with auto-stop after 30 minutes."""
     return {
         CONF_INTERVAL: 0,
         CONF_UPDATE_INTERVAL: 60,
         CONF_SOURCE_ENTITY: XBOX,
         CONF_RUNNING_STATES: ["playing"],
         CONF_GRACE_PERIOD: 120,
-        CONF_AUTO_RESET: True,
-        CONF_AUTO_RESET_DELAY: 1800,
+        CONF_AUTO_STOP: True,
+        CONF_AUTO_STOP_DELAY: 1800,
     }
 
 
@@ -162,30 +162,33 @@ async def test_dropout_then_off_pauses_backdated(
 
 
 @pytest.mark.usefixtures("setup_stopwatch")
-async def test_auto_reset_after_the_delay(
+async def test_auto_stop_after_the_delay(
     hass: HomeAssistant, freezer: FrozenDateTimeFactory, events: list[Event]
 ) -> None:
-    """Inactive for at least the delay: the next start is a new session."""
+    """Inactive for the delay: the session ends, the next start is a new one."""
     await _xbox(hass, "playing")
     await _advance(hass, freezer, 600)
     await _xbox(hass, "off")
-    await _advance(hass, freezer, 1800)
-    # The last session stays visible until the next start
-    assert _elapsed(hass) == 600
+    await _advance(hass, freezer, 1799)
+    assert hass.states.get(STATUS).state == "paused"
+    await _advance(hass, freezer, 1)
+    assert hass.states.get(STATUS).state == "idle"
+    assert _elapsed(hass) == 0
+    assert _types(events)[-1] == ("stopped", "auto_stop")
+    # The event and the last session sensor keep the time of the session
+    assert events[-1].data["elapsed_seconds"] == 600
+    assert hass.states.get(LAST_SESSION).state == "600"
+
     await _xbox(hass, "playing")
     assert hass.states.get(STATUS).state == "running"
-    assert _elapsed(hass) == 0
-    assert _types(events)[-2:] == [
-        ("reset", "auto_reset"),
-        ("started", "source_entity"),
-    ]
+    assert _types(events)[-1] == ("started", "source_entity")
 
 
 @pytest.mark.usefixtures("setup_stopwatch")
-async def test_no_auto_reset_before_the_delay(
+async def test_no_auto_stop_before_the_delay(
     hass: HomeAssistant, freezer: FrozenDateTimeFactory, events: list[Event]
 ) -> None:
-    """Inactive for less than the delay: the session continues."""
+    """Back within the delay: the session continues."""
     await _xbox(hass, "playing")
     await _advance(hass, freezer, 600)
     await _xbox(hass, "off")
@@ -194,22 +197,85 @@ async def test_no_auto_reset_before_the_delay(
     assert _types(events)[-1] == ("resumed", "source_entity")
     assert _elapsed(hass) == 600
 
+    # The delay starts again with the next inactivity
+    await _xbox(hass, "off")
+    await _advance(hass, freezer, 1799)
+    assert hass.states.get(STATUS).state == "paused"
+    await _advance(hass, freezer, 1)
+    assert hass.states.get(STATUS).state == "idle"
+
 
 @pytest.mark.usefixtures("setup_stopwatch")
-async def test_no_auto_reset_of_a_manually_started_stopwatch(
+async def test_no_auto_stop_of_a_manually_started_stopwatch(
     hass: HomeAssistant, freezer: FrozenDateTimeFactory, events: list[Event]
 ) -> None:
-    """A stopwatch started by hand while the source was off is not reset."""
+    """A stopwatch started by hand while the source is off keeps running."""
     await _xbox(hass, "playing")
     await _xbox(hass, "off")
-    await _advance(hass, freezer, 3600)
+    await _advance(hass, freezer, 60)
     await hass.services.async_call(
         "button", "press", {"entity_id": START}, blocking=True
     )
-    await _advance(hass, freezer, 60)
-    await _xbox(hass, "playing")
-    assert "reset" not in [event.data["type"] for event in events]
+    await _advance(hass, freezer, 3600)
+    assert "stopped" not in [event.data["type"] for event in events]
     assert hass.states.get(STATUS).state == "running"
+
+
+@pytest.mark.usefixtures("setup_stopwatch")
+async def test_auto_stop_while_the_source_is_unavailable(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, events: list[Event]
+) -> None:
+    """A source that turns off and then becomes unavailable still ends the session."""
+    await _xbox(hass, "playing")
+    await _advance(hass, freezer, 600)
+    await _xbox(hass, "off")
+    await _advance(hass, freezer, 60)
+    await _xbox(hass, STATE_UNAVAILABLE)
+    await _advance(hass, freezer, 1740)
+    assert hass.states.get(STATUS).state == "idle"
+    assert _types(events)[-1] == ("stopped", "auto_stop")
+
+
+@pytest.mark.usefixtures("setup_stopwatch")
+async def test_auto_stop_after_a_long_dropout(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, events: list[Event]
+) -> None:
+    """The delay of a dropout counts from its start, like the backdated pause."""
+    await _xbox(hass, "playing")
+    await _advance(hass, freezer, 600)
+    await _xbox(hass, STATE_UNAVAILABLE)
+    await _advance(hass, freezer, 120)
+    assert hass.states.get(STATUS).state == "paused"
+    await _advance(hass, freezer, 1680)
+    assert hass.states.get(STATUS).state == "idle"
+    assert events[-1].data["elapsed_seconds"] == 600
+
+
+@pytest.mark.usefixtures("setup_stopwatch")
+@pytest.mark.parametrize(
+    "options",
+    [
+        {
+            CONF_INTERVAL: 0,
+            CONF_UPDATE_INTERVAL: 60,
+            CONF_SOURCE_ENTITY: XBOX,
+            CONF_RUNNING_STATES: ["playing"],
+            CONF_GRACE_PERIOD: 120,
+            CONF_AUTO_STOP: False,
+            CONF_AUTO_STOP_DELAY: 1800,
+        }
+    ],
+)
+async def test_no_auto_stop_when_turned_off(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory
+) -> None:
+    """Without auto-stop, the stopwatch stays paused."""
+    await _xbox(hass, "playing")
+    await _advance(hass, freezer, 600)
+    await _xbox(hass, "off")
+    await _advance(hass, freezer, 7200)
+    assert hass.states.get(STATUS).state == "paused"
+    assert _elapsed(hass) == 600
 
 
 async def test_starts_when_the_source_already_plays(
@@ -223,13 +289,13 @@ async def test_starts_when_the_source_already_plays(
     assert hass.states.get(STATUS).state == "running"
 
 
-async def test_auto_reset_across_a_restart(
+async def test_auto_stop_across_a_restart(
     hass: HomeAssistant,
     freezer: FrozenDateTimeFactory,
     setup_stopwatch: MockConfigEntry,
     events: list[Event],
 ) -> None:
-    """The inactivity time survives a restart of Home Assistant."""
+    """A delay that ran out while Home Assistant was down stops right after start."""
     await _xbox(hass, "playing")
     await _advance(hass, freezer, 600)
     await _xbox(hass, "off")
@@ -238,13 +304,30 @@ async def test_auto_reset_across_a_restart(
 
     freezer.tick(timedelta(hours=8))
     assert await hass.config_entries.async_setup(setup_stopwatch.entry_id)
-    await hass.async_block_till_done()
-    assert hass.states.get(STATUS).state == "paused"
+    await _advance(hass, freezer, 0)
+    assert hass.states.get(STATUS).state == "idle"
+    assert _types(events)[-1] == ("stopped", "auto_stop")
+    assert hass.states.get(LAST_SESSION).state == "600"
+
+
+async def test_auto_stop_delay_continues_across_a_restart(
+    hass: HomeAssistant,
+    freezer: FrozenDateTimeFactory,
+    setup_stopwatch: MockConfigEntry,
+) -> None:
+    """A restart within the delay keeps the original deadline."""
     await _xbox(hass, "playing")
-    assert _types(events)[-2:] == [
-        ("reset", "auto_reset"),
-        ("started", "source_entity"),
-    ]
+    await _advance(hass, freezer, 600)
+    await _xbox(hass, "off")
+    assert await hass.config_entries.async_unload(setup_stopwatch.entry_id)
+    await hass.async_block_till_done()
+
+    freezer.tick(timedelta(minutes=20))
+    assert await hass.config_entries.async_setup(setup_stopwatch.entry_id)
+    await _advance(hass, freezer, 0)
+    assert hass.states.get(STATUS).state == "paused"
+    await _advance(hass, freezer, 600)
+    assert hass.states.get(STATUS).state == "idle"
 
 
 async def test_grace_period_continues_across_a_restart(
@@ -279,8 +362,8 @@ async def test_grace_period_continues_across_a_restart(
             CONF_SOURCE_ENTITY: XBOX,
             CONF_RUNNING_STATES: ["playing"],
             CONF_GRACE_PERIOD: 0,
-            CONF_AUTO_RESET: False,
-            CONF_AUTO_RESET_DELAY: 1800,
+            CONF_AUTO_STOP: False,
+            CONF_AUTO_STOP_DELAY: 1800,
         }
     ],
 )
@@ -311,30 +394,34 @@ async def test_no_grace_period_pauses_immediately(
             CONF_SOURCE_ENTITY: XBOX,
             CONF_RUNNING_STATES: ["playing"],
             CONF_GRACE_PERIOD: 120,
-            CONF_AUTO_RESET: True,
-            CONF_AUTO_RESET_DELAY: 0,
+            CONF_AUTO_STOP: True,
+            CONF_AUTO_STOP_DELAY: 0,
         }
     ],
 )
-async def test_auto_reset_delay_zero_resets_on_every_start(
+async def test_auto_stop_delay_zero_stops_right_away(
     hass: HomeAssistant, freezer: FrozenDateTimeFactory, events: list[Event]
 ) -> None:
-    """With a delay of 0, every new start of the source is a new session."""
+    """With a delay of 0, the session ends as soon as the source is inactive."""
     await _xbox(hass, "playing")
     await _advance(hass, freezer, 300)
     await _xbox(hass, "off")
-    assert _elapsed(hass) == 300
-    await _xbox(hass, "playing")
-    assert _elapsed(hass) == 0
+    await _advance(hass, freezer, 0)
+    assert hass.states.get(STATUS).state == "idle"
     assert _types(events)[-2:] == [
-        ("reset", "auto_reset"),
-        ("started", "source_entity"),
+        ("paused", "source_entity"),
+        ("stopped", "auto_stop"),
     ]
+    assert events[-1].data["elapsed_seconds"] == 300
+    await _xbox(hass, "playing")
+    assert _types(events)[-1] == ("started", "source_entity")
 
-    # A manual pause while the source keeps playing is resumed without a reset
+    # A manual pause while the source keeps playing is not stopped
     await hass.services.async_call(
         "button", "press", {"entity_id": PAUSE}, blocking=True
     )
+    await _advance(hass, freezer, 60)
+    assert hass.states.get(STATUS).state == "paused"
     await hass.services.async_call(
         "button", "press", {"entity_id": START}, blocking=True
     )

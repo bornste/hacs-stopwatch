@@ -17,13 +17,16 @@ from custom_components.stopwatch_plus.const import (
     CONF_UPDATE_INTERVAL,
     DOMAIN,
 )
-from custom_components.stopwatch_plus.sensor import StopwatchElapsedSensor
+from custom_components.stopwatch_plus.sensor import (
+    StopwatchElapsedSensor,
+    StopwatchLastSessionSensor,
+)
 from custom_components.stopwatch_plus.stopwatch import format_duration
 from homeassistant.core import Event, HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import entity_registry as er
 
-from .conftest import ELAPSED, PAUSE, RESET, START, STATUS, STOP
+from .conftest import ELAPSED, LAST_SESSION, PAUSE, RESET, START, STATUS, STOP
 
 pytestmark = pytest.mark.usefixtures("setup_stopwatch")
 
@@ -62,6 +65,7 @@ async def test_initial_state(hass: HomeAssistant) -> None:
     assert elapsed.attributes["unit_of_measurement"] == "s"
     assert elapsed.attributes["status"] == "idle"
     assert hass.states.get(STATUS).state == "idle"
+    assert hass.states.get(LAST_SESSION).state == "unknown"
     for button in (START, PAUSE, STOP, RESET):
         assert hass.states.get(button) is not None
 
@@ -342,8 +346,10 @@ async def test_stop_while_running(
     assert hass.states.get(STATUS).state == "idle"
     assert _elapsed(hass) == 0
     assert hass.states.get(ELAPSED).attributes["started_at"] is None
+    # The event reports the time the session reached
     assert events[-1].data["type"] == "stopped"
-    assert events[-1].data["elapsed_seconds"] == 0
+    assert events[-1].data["elapsed_seconds"] == 60
+    assert events[-1].data["elapsed_formatted"] == "00:01:00"
 
     # The next start is a new session
     await _press(hass, START)
@@ -362,6 +368,9 @@ async def test_reset_while_running_keeps_running(
     assert _elapsed(hass) == 0
     assert hass.states.get(ELAPSED).attributes["interval_count"] == 0
     assert [e.data["type"] for e in events] == ["started", "interval", "reset"]
+    assert events[-1].data["elapsed_seconds"] == 90
+    assert events[-1].data["interval_count"] == 1
+    assert hass.states.get(LAST_SESSION).state == "90"
 
     # The next interval is one minute after the reset, not after the start
     await _advance(hass, freezer, 30)
@@ -388,3 +397,45 @@ async def test_stop_and_reset_actions(
         ("reset", "action"),
         ("stopped", "action"),
     ]
+
+
+async def test_last_session_sensor(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory
+) -> None:
+    """The last session keeps its time when the stopwatch goes back to zero."""
+    await _press(hass, START)
+    await _advance(hass, freezer, 3725)
+    await _press(hass, PAUSE)
+    # Pausing does not end the session
+    assert hass.states.get(LAST_SESSION).state == "unknown"
+    await _press(hass, STOP)
+
+    state = hass.states.get(LAST_SESSION)
+    assert state.state == "3725"
+    assert state.attributes["device_class"] == "duration"
+    assert state.attributes["elapsed_formatted"] == "01:02:05"
+    assert state.attributes["ended_at"] is not None
+    assert "elapsed_formatted" in StopwatchLastSessionSensor._unrecorded_attributes
+
+    # A new session does not change it until it ends
+    await _press(hass, START)
+    await _advance(hass, freezer, 60)
+    assert hass.states.get(LAST_SESSION).state == "3725"
+    await _press(hass, RESET)
+    assert hass.states.get(LAST_SESSION).state == "60"
+
+
+async def test_last_session_survives_a_restart(
+    hass: HomeAssistant,
+    freezer: FrozenDateTimeFactory,
+    setup_stopwatch: MockConfigEntry,
+) -> None:
+    """The last session is restored after a restart."""
+    await _press(hass, START)
+    await _advance(hass, freezer, 120)
+    await _press(hass, STOP)
+    assert await hass.config_entries.async_unload(setup_stopwatch.entry_id)
+    await hass.async_block_till_done()
+    assert await hass.config_entries.async_setup(setup_stopwatch.entry_id)
+    await hass.async_block_till_done()
+    assert hass.states.get(LAST_SESSION).state == "120"

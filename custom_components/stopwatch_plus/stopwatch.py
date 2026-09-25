@@ -86,6 +86,9 @@ class Stopwatch:
         self.running_since: datetime | None = None
         self.started_at: datetime | None = None
         self.interval_count: int = 0
+        # Running time of the last session, kept when the time goes back to zero
+        self.last_session_seconds: float | None = None
+        self.last_session_ended_at: datetime | None = None
         # Persisted state of the source entity binding (see source.py)
         self.source_data: dict[str, Any] = {}
 
@@ -118,6 +121,11 @@ class Stopwatch:
         self.running_since = dt_util.parse_datetime(data.get("running_since") or "")
         self.started_at = dt_util.parse_datetime(data.get("started_at") or "")
         self.interval_count = int(data.get("interval_count", 0))
+        if data.get("last_session_seconds") is not None:
+            self.last_session_seconds = float(data["last_session_seconds"])
+        self.last_session_ended_at = dt_util.parse_datetime(
+            data.get("last_session_ended_at") or ""
+        )
         self.source_data = dict(data.get("source_data") or {})
 
         if self.status == STATUS_RUNNING and self.running_since is None:
@@ -162,6 +170,8 @@ class Stopwatch:
             "running_since": _isoformat(self.running_since),
             "started_at": _isoformat(self.started_at),
             "interval_count": self.interval_count,
+            "last_session_seconds": self.last_session_seconds,
+            "last_session_ended_at": _isoformat(self.last_session_ended_at),
             "source_data": self.source_data,
         }
 
@@ -262,9 +272,12 @@ class Stopwatch:
         if self.status == STATUS_IDLE:
             return
 
+        elapsed_seconds, interval_count = self._end_session()
         self._clear()
         self._changed()
-        self._fire_event(EVENT_TYPE_STOPPED, source)
+        self._fire_event(
+            EVENT_TYPE_STOPPED, source, elapsed_seconds, interval_count=interval_count
+        )
 
     @callback
     def async_reset(self, source: str) -> None:
@@ -276,6 +289,7 @@ class Stopwatch:
         if self.status == STATUS_IDLE:
             return
 
+        elapsed_seconds, interval_count = self._end_session()
         if self.status == STATUS_RUNNING:
             now = dt_util.utcnow()
             self.accumulated_seconds = 0.0
@@ -286,7 +300,22 @@ class Stopwatch:
         else:
             self._clear()
         self._changed()
-        self._fire_event(EVENT_TYPE_RESET, source)
+        self._fire_event(
+            EVENT_TYPE_RESET, source, elapsed_seconds, interval_count=interval_count
+        )
+
+    @callback
+    def _end_session(self) -> tuple[float, int]:
+        """Remember the running time of the session that ends now.
+
+        Returns the elapsed time and interval count before going back to zero,
+        so the stopped and reset events report what the session reached.
+        """
+        elapsed_seconds = self.elapsed_seconds
+        if elapsed_seconds > 0:
+            self.last_session_seconds = elapsed_seconds
+            self.last_session_ended_at = dt_util.utcnow()
+        return elapsed_seconds, self.interval_count
 
     @callback
     def _clear(self) -> None:
@@ -365,10 +394,14 @@ class Stopwatch:
         event_type: str,
         source: str | None,
         elapsed_seconds: float | None = None,
+        *,
+        interval_count: int | None = None,
     ) -> None:
         """Fire a stopwatch event on the event bus."""
         if elapsed_seconds is None:
             elapsed_seconds = self.elapsed_seconds
+        if interval_count is None:
+            interval_count = self.interval_count
 
         entity_registry = er.async_get(self.hass)
         entity_id = entity_registry.async_get_entity_id(
@@ -384,7 +417,7 @@ class Stopwatch:
             "name": self.name,
             "elapsed_seconds": int(elapsed_seconds),
             "elapsed_formatted": format_duration(elapsed_seconds),
-            "interval_count": self.interval_count,
+            "interval_count": interval_count,
             "source": source,
         }
         _LOGGER.debug("Firing %s: %s", EVENT_STOPWATCH, data)

@@ -9,15 +9,15 @@ from homeassistant.helpers import config_validation as cv
 from homeassistant.helpers.typing import ConfigType
 
 from .const import (
-    CONF_AUTO_RESET,
-    CONF_AUTO_RESET_DELAY,
+    CONF_AUTO_STOP,
+    CONF_AUTO_STOP_DELAY,
     CONF_GRACE_PERIOD,
     CONF_INTERVAL,
     CONF_RUNNING_STATES,
     CONF_SOURCE_ENTITY,
     CONF_UPDATE_INTERVAL,
-    DEFAULT_AUTO_RESET,
-    DEFAULT_AUTO_RESET_DELAY,
+    DEFAULT_AUTO_STOP,
+    DEFAULT_AUTO_STOP_DELAY,
     DEFAULT_GRACE_PERIOD,
     DEFAULT_INTERVAL,
     DEFAULT_RUNNING_STATES,
@@ -70,9 +70,9 @@ async def async_setup_entry(hass: HomeAssistant, entry: StopwatchConfigEntry) ->
             grace_period_seconds=int(
                 options.get(CONF_GRACE_PERIOD, DEFAULT_GRACE_PERIOD)
             ),
-            auto_reset=bool(options.get(CONF_AUTO_RESET, DEFAULT_AUTO_RESET)),
-            auto_reset_delay_seconds=int(
-                options.get(CONF_AUTO_RESET_DELAY, DEFAULT_AUTO_RESET_DELAY)
+            auto_stop=bool(options.get(CONF_AUTO_STOP, DEFAULT_AUTO_STOP)),
+            auto_stop_delay_seconds=int(
+                options.get(CONF_AUTO_STOP_DELAY, DEFAULT_AUTO_STOP_DELAY)
             ),
         )
         stopwatch.async_on_shutdown(binding.async_stop)

@@ -9,7 +9,7 @@ from homeassistant.const import UnitOfTime
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import KEY_ELAPSED, KEY_STATUS, STATUSES
+from .const import KEY_ELAPSED, KEY_LAST_SESSION, KEY_STATUS, STATUSES
 from .entity import StopwatchEntity
 from .stopwatch import format_duration
 
@@ -30,6 +30,7 @@ async def async_setup_entry(
         [
             StopwatchElapsedSensor(stopwatch, KEY_ELAPSED),
             StopwatchStatusSensor(stopwatch, KEY_STATUS),
+            StopwatchLastSessionSensor(stopwatch, KEY_LAST_SESSION),
         ]
     )
 
@@ -84,6 +85,31 @@ class StopwatchStatusSensor(StopwatchSensor):
     def native_value(self) -> str:
         """Return the status."""
         return self._stopwatch.status
+
+
+class StopwatchLastSessionSensor(StopwatchSensor):
+    """The running time of the last session, set when the time goes back to zero."""
+
+    _attr_device_class = SensorDeviceClass.DURATION
+    _attr_native_unit_of_measurement = UnitOfTime.SECONDS
+    _attr_suggested_display_precision = 0
+    _unrecorded_attributes = frozenset({"elapsed_formatted"})
+
+    @property
+    def native_value(self) -> int | None:
+        """Return the running time of the last session in whole seconds."""
+        seconds = self._stopwatch.last_session_seconds
+        return None if seconds is None else int(seconds)
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the formatted time and when the session ended."""
+        stopwatch = self._stopwatch
+        seconds = stopwatch.last_session_seconds
+        return {
+            "elapsed_formatted": None if seconds is None else format_duration(seconds),
+            "ended_at": _isoformat(stopwatch.last_session_ended_at),
+        }
 
 
 def _isoformat(value: Any) -> str | None:

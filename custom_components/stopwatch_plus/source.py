@@ -21,7 +21,7 @@ from homeassistant.helpers.event import (
 )
 from homeassistant.util import dt as dt_util
 
-from .const import SOURCE_AUTO_RESET, SOURCE_SOURCE_ENTITY, STATUS_PAUSED
+from .const import SOURCE_AUTO_STOP, SOURCE_SOURCE_ENTITY, STATUS_PAUSED
 from .stopwatch import Stopwatch
 
 _LOGGER = logging.getLogger(__name__)
@@ -40,15 +40,16 @@ class SourceState(Enum):
 
 
 class SourceBinding:
-    """Start, pause and reset a stopwatch following a source entity.
+    """Start, pause and stop a stopwatch following a source entity.
 
     - A "running" state starts or resumes the stopwatch.
     - Any other valid state pauses it.
     - unavailable/unknown keeps the stopwatch as it is for a grace period. If the
       source does not come back as running within it, the stopwatch is paused,
       backdated to the moment the source became unavailable.
-    - With auto-reset, a source that was inactive for at least the delay starts a
-      new session: the stopwatch is reset and started again.
+    - With auto-stop, a source that stays inactive for the delay ends the
+      session: the stopwatch is stopped (back to zero), so the next start of the
+      source begins a new session.
     """
 
     def __init__(
@@ -58,8 +59,8 @@ class SourceBinding:
         entity_id: str,
         running_states: list[str],
         grace_period_seconds: int,
-        auto_reset: bool,
-        auto_reset_delay_seconds: int,
+        auto_stop: bool,
+        auto_stop_delay_seconds: int,
     ) -> None:
         """Initialize the binding."""
         self.hass = hass
@@ -67,10 +68,12 @@ class SourceBinding:
         self._entity_id = entity_id
         self._running_states = {state.strip() for state in running_states}
         self._grace_period = timedelta(seconds=grace_period_seconds)
-        self._auto_reset = auto_reset
-        self._auto_reset_delay = timedelta(seconds=auto_reset_delay_seconds)
+        self._auto_stop = auto_stop
+        self._auto_stop_delay = timedelta(seconds=auto_stop_delay_seconds)
         self._cancel_state_listener: CALLBACK_TYPE | None = None
         self._cancel_grace_timer: CALLBACK_TYPE | None = None
+        self._cancel_stop_timer: CALLBACK_TYPE | None = None
+        self._stop_deadline: datetime | None = None
 
     @callback
     def async_start(self) -> None:
@@ -89,6 +92,7 @@ class SourceBinding:
             self._cancel_state_listener()
             self._cancel_state_listener = None
         self._cancel_grace()
+        self._cancel_auto_stop()
 
     def _classify(self, state: State | None) -> SourceState:
         """Interpret a state of the source entity."""
@@ -123,24 +127,15 @@ class SourceBinding:
             self._on_inactive(now)
         else:
             self._on_unavailable(now)
+        self._update_auto_stop()
 
     @callback
     def _on_running(self, now: datetime) -> None:
-        """Start, resume or begin a new session."""
+        """Start or resume the stopwatch."""
         self._cancel_grace()
-        inactive_since = self._get_time(KEY_INACTIVE_SINCE)
         self._set_time(KEY_UNAVAILABLE_SINCE, None)
         self._set_time(KEY_INACTIVE_SINCE, None)
-
-        stopwatch = self._stopwatch
-        if (
-            self._auto_reset
-            and inactive_since is not None
-            and stopwatch.status == STATUS_PAUSED
-            and now - inactive_since >= self._auto_reset_delay
-        ):
-            stopwatch.async_reset(SOURCE_AUTO_RESET)
-        stopwatch.async_start(SOURCE_SOURCE_ENTITY)
+        self._stopwatch.async_start(SOURCE_SOURCE_ENTITY)
 
     @callback
     def _on_inactive(self, now: datetime) -> None:
@@ -181,6 +176,52 @@ class SourceBinding:
         self._stopwatch.async_pause(SOURCE_SOURCE_ENTITY, at=unavailable_since)
         if self._get_time(KEY_INACTIVE_SINCE) is None:
             self._set_time(KEY_INACTIVE_SINCE, unavailable_since)
+        self._update_auto_stop()
+
+    @callback
+    def _update_auto_stop(self) -> None:
+        """Schedule the automatic stop while the source is inactive.
+
+        The stop is due when the source has been inactive for the delay. It only
+        applies to a paused stopwatch, so a stopwatch started by hand in the
+        meantime keeps running. A deadline that passed while Home Assistant was
+        down stops the stopwatch right after the start.
+        """
+        inactive_since = self._get_time(KEY_INACTIVE_SINCE)
+        if (
+            not self._auto_stop
+            or inactive_since is None
+            or self._stopwatch.status != STATUS_PAUSED
+        ):
+            self._cancel_auto_stop()
+            return
+        deadline = inactive_since + self._auto_stop_delay
+        if self._cancel_stop_timer is not None and self._stop_deadline == deadline:
+            return
+        self._cancel_auto_stop()
+        self._stop_deadline = deadline
+        self._cancel_stop_timer = async_track_point_in_utc_time(
+            self.hass, self._handle_auto_stop, max(deadline, dt_util.utcnow())
+        )
+
+    @callback
+    def _handle_auto_stop(self, _now: datetime) -> None:
+        """The source stayed inactive for the delay: end the session."""
+        self._cancel_stop_timer = None
+        self._stop_deadline = None
+        if (
+            self._get_time(KEY_INACTIVE_SINCE) is not None
+            and self._stopwatch.status == STATUS_PAUSED
+        ):
+            self._stopwatch.async_stop(SOURCE_AUTO_STOP)
+
+    @callback
+    def _cancel_auto_stop(self) -> None:
+        """Cancel a scheduled automatic stop."""
+        if self._cancel_stop_timer is not None:
+            self._cancel_stop_timer()
+            self._cancel_stop_timer = None
+        self._stop_deadline = None
 
     @callback
     def _cancel_grace(self) -> None:

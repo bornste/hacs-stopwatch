@@ -22,15 +22,15 @@
               "source_entity": "Quell-Entität",
               "running_states": "Lauf-Zustände",
               "grace_period": "Karenzzeit bei Nichtverfügbarkeit",
-              "auto_reset": "Bei neuer Session automatisch zurücksetzen",
-              "auto_reset_delay": "Inaktivität bis zur neuen Session"
+              "auto_stop": "Nach Inaktivität automatisch stoppen",
+              "auto_stop_delay": "Inaktivität bis zum Stopp"
             },
             "data_description": {
               "source_entity": "Leer lassen, um die Stoppuhr nur mit Buttons, Aktionen und Automationen zu steuern.",
               "running_states": "Zustände der Quell-Entität, in denen die Stoppuhr läuft, z. B. „playing“ oder „on“. Eigene Werte können eingetippt werden.",
               "grace_period": "Ist die Quelle länger als diese Zeit nicht verfügbar oder unbekannt, pausiert die Stoppuhr rückwirkend ab Beginn des Ausfalls. 0 schaltet die Karenzzeit aus: Nicht verfügbar pausiert dann sofort wie jeder andere Zustand, der nicht als laufend gilt. Höchstens 1 Stunde.",
-              "auto_reset": "Startet die Quelle nach langer Inaktivität wieder, wird die Stoppuhr vorher zurückgesetzt.",
-              "auto_reset_delay": "Wie lange die Quelle inaktiv sein muss, damit ihr nächster Start als neue Session gilt, höchstens 7 Tage. 0: Jeder neue Start der Quelle beginnt eine neue Session."
+              "auto_stop": "Bleibt die Quelle so lange inaktiv wie unten eingestellt, endet die Session: Die Stoppuhr wird angehalten und auf null gesetzt. Die Zeit der Session bleibt im Sensor „Letzte Session“ erhalten. Der nächste Start der Quelle beginnt eine neue Session.",
+              "auto_stop_delay": "Wie lange die Quelle inaktiv sein muss, bis die Stoppuhr gestoppt wird, höchstens 7 Tage. 0: Die Stoppuhr stoppt, sobald die Quelle inaktiv wird."
             }
           }
         }
@@ -41,7 +41,7 @@
       "update_interval_out_of_range": "Das Aktualisierungsintervall muss zwischen 1 Sekunde und 1 Stunde liegen.",
       "running_states_required": "Wähle mindestens einen Lauf-Zustand für die Quell-Entität.",
       "grace_period_too_long": "Die Karenzzeit darf höchstens 1 Stunde betragen.",
-      "auto_reset_delay_too_long": "Die Inaktivität bis zur neuen Session darf höchstens 7 Tage betragen."
+      "auto_stop_delay_too_long": "Die Inaktivität bis zum Stopp darf höchstens 7 Tage betragen."
     }
   },
   "options": {
@@ -64,15 +64,15 @@
               "source_entity": "Quell-Entität",
               "running_states": "Lauf-Zustände",
               "grace_period": "Karenzzeit bei Nichtverfügbarkeit",
-              "auto_reset": "Bei neuer Session automatisch zurücksetzen",
-              "auto_reset_delay": "Inaktivität bis zur neuen Session"
+              "auto_stop": "Nach Inaktivität automatisch stoppen",
+              "auto_stop_delay": "Inaktivität bis zum Stopp"
             },
             "data_description": {
               "source_entity": "Leer lassen, um die Stoppuhr nur mit Buttons, Aktionen und Automationen zu steuern.",
               "running_states": "Zustände der Quell-Entität, in denen die Stoppuhr läuft, z. B. „playing“ oder „on“. Eigene Werte können eingetippt werden.",
               "grace_period": "Ist die Quelle länger als diese Zeit nicht verfügbar oder unbekannt, pausiert die Stoppuhr rückwirkend ab Beginn des Ausfalls. 0 schaltet die Karenzzeit aus: Nicht verfügbar pausiert dann sofort wie jeder andere Zustand, der nicht als laufend gilt. Höchstens 1 Stunde.",
-              "auto_reset": "Startet die Quelle nach langer Inaktivität wieder, wird die Stoppuhr vorher zurückgesetzt.",
-              "auto_reset_delay": "Wie lange die Quelle inaktiv sein muss, damit ihr nächster Start als neue Session gilt, höchstens 7 Tage. 0: Jeder neue Start der Quelle beginnt eine neue Session."
+              "auto_stop": "Bleibt die Quelle so lange inaktiv wie unten eingestellt, endet die Session: Die Stoppuhr wird angehalten und auf null gesetzt. Die Zeit der Session bleibt im Sensor „Letzte Session“ erhalten. Der nächste Start der Quelle beginnt eine neue Session.",
+              "auto_stop_delay": "Wie lange die Quelle inaktiv sein muss, bis die Stoppuhr gestoppt wird, höchstens 7 Tage. 0: Die Stoppuhr stoppt, sobald die Quelle inaktiv wird."
             }
           }
         }
@@ -83,7 +83,7 @@
       "update_interval_out_of_range": "Das Aktualisierungsintervall muss zwischen 1 Sekunde und 1 Stunde liegen.",
       "running_states_required": "Wähle mindestens einen Lauf-Zustand für die Quell-Entität.",
       "grace_period_too_long": "Die Karenzzeit darf höchstens 1 Stunde betragen.",
-      "auto_reset_delay_too_long": "Die Inaktivität bis zur neuen Session darf höchstens 7 Tage betragen."
+      "auto_stop_delay_too_long": "Die Inaktivität bis zum Stopp darf höchstens 7 Tage betragen."
     }
   },
   "entity": {
@@ -140,6 +140,17 @@
           "running": "Läuft",
           "paused": "Pausiert"
         }
+      },
+      "last_session": {
+        "name": "Letzte Session",
+        "state_attributes": {
+          "elapsed_formatted": {
+            "name": "Letzte Session (formatiert)"
+          },
+          "ended_at": {
+            "name": "Beendet um"
+          }
+        }
       }
     },
     "event": {
@@ -171,7 +182,7 @@
               "action": "Aktion",
               "button": "Button",
               "source_entity": "Quell-Entität",
-              "auto_reset": "Automatisches Zurücksetzen"
+              "auto_stop": "Automatischer Stopp"
             }
           }
         }

@@ -24,16 +24,17 @@ A stopwatch integration for [Home Assistant](https://www.home-assistant.io/) tha
 
 ## Features
 
-- **Any number of stopwatches**, each set up as its own device (e.g. "Gaming", "Work time", "TV on").
+- **Any number of stopwatches**, each stopwatch can be started/stopped manual or can be bound to its own device (e.g. "Gaming", "Work time", "TV on").
 - **Buttons** for each stopwatch: Start, Pause, Stop, Reset and a combined Start/Pause – ready for dashboards.
 - **Actions** `stopwatch_plus.start` (also resumes), `stopwatch_plus.pause`, `stopwatch_plus.stop`, `stopwatch_plus.reset` and `stopwatch_plus.toggle`, with a stopwatch entity or device as target.
-- **Sensors:** the elapsed time as a duration sensor (with an `HH:MM:SS` attribute) and the status (`idle`, `running`, `paused`).
-- **Follow a source entity** (optional): the stopwatch runs while an entity is in one of the chosen states (e.g. `media_player.xbox` is `playing`) and pauses otherwise – with a grace period for short dropouts and an optional auto-reset for new sessions.
+- **Sensors:** the elapsed time as a duration sensor (with an `HH:MM:SS` attribute), the status (`idle`, `running`, `paused`) and the time of the last session.
+- **Follow a source entity** (optional): the stopwatch runs while an entity is in one of the chosen states (e.g. `media_player.xbox` is `playing`) and pauses otherwise – with a grace period for short dropouts and an optional auto-stop that ends the session after a while of inactivity.
 - **Interval events** based on running time only (pauses do not count) – for example to announce "You have been playing for 60 minutes".
 - **Automation triggers without typing:** every event is available as a device trigger and via the event entity in the trigger *Event received*.
 - **Survives restarts:** the state is kept when Home Assistant restarts; a running stopwatch keeps counting.
 - **Database-friendly:** the sensor update interval is configurable (default 60 seconds).
-- English and German translations, icon and logo.
+- **Translations:** English and German. Contributions are welcome: copy [`en.json`](custom_components/stopwatch_plus/translations/en.json), translate it, save it as `<language code>.json` (e.g. `fr.json`) and open a pull request.
+- Icon and logo in light and dark.
 
 ## Roadmap
 
@@ -69,13 +70,13 @@ Optionally, a stopwatch can follow any entity, for example `media_player.xbox`. 
 
 - **Running states:** the stopwatch runs while the entity is in one of these states (e.g. `playing`) and pauses in any other state.
 - **Grace period:** some devices briefly report `unavailable`. Within the grace period nothing happens; if the dropout lasts longer, the stopwatch pauses, backdated to the start of the dropout. Set it to 0 to turn it off: `unavailable` then pauses right away, like any other state that is not a running state.
-- **Auto-reset:** if the entity was inactive for longer than the configured delay, its next start begins a new session – the stopwatch is reset and started again. Until then, the time of the last session stays visible. With a delay of 0, every new start of the entity begins a new session.
+- **Stop automatically after inactivity:** if the entity stays inactive for the configured delay (e.g. 30 minutes), the session ends: the stopwatch is stopped and set back to zero, and its next start begins a new session. The time of the session stays in the sensor *Last session* and in the `stopped` event. Coming back within the delay simply resumes the session. With a delay of 0, the stopwatch stops as soon as the entity becomes inactive.
 
 Buttons and actions keep working while a source is set.
 
 ### Resetting at a fixed time
 
-Without auto-reset, a stopwatch is only set back to zero by its Stop or Reset button, the actions `stopwatch_plus.stop` and `stopwatch_plus.reset` or an automation – a restart of Home Assistant keeps the time. To start from zero every day, for example, reset it with a time trigger (this can be combined with auto-reset). If it happens to be running at that moment, it keeps running from zero; use `stopwatch_plus.stop` instead to stop it:
+Without auto-stop, a stopwatch is only set back to zero by its Stop or Reset button, the actions `stopwatch_plus.stop` and `stopwatch_plus.reset` or an automation – a restart of Home Assistant keeps the time. To start from zero every day, for example, reset it with a time trigger (this can be combined with auto-stop). If it happens to be running at that moment, it keeps running from zero; use `stopwatch_plus.stop` instead to stop it:
 
 ```yaml
 alias: Reset the gaming stopwatch every morning
@@ -139,6 +140,9 @@ actions:
     data:
       message: "Playing for {{ trigger.event.data.elapsed_formatted }}"
 ```
+
+- **Last session:** the sensor `sensor.<name>_last_session` keeps the time of the last session after the stopwatch went back to zero, e.g. to show "Last session 02:15:30" below the running time. Its history shows the length of every session.
+- **Total per day or week:** Home Assistant's built-in [History stats](https://www.home-assistant.io/integrations/history_stats/) integration can add up how long `sensor.<name>_status` was `running`, e.g. the playing time today – no extra setup in Stopwatch Plus needed.
 
 ## Development
 

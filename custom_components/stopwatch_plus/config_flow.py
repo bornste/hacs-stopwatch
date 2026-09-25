@@ -27,21 +27,21 @@ from homeassistant.helpers.selector import (
 )
 
 from .const import (
-    CONF_AUTO_RESET,
-    CONF_AUTO_RESET_DELAY,
+    CONF_AUTO_STOP,
+    CONF_AUTO_STOP_DELAY,
     CONF_GRACE_PERIOD,
     CONF_INTERVAL,
     CONF_RUNNING_STATES,
     CONF_SOURCE_ENTITY,
     CONF_UPDATE_INTERVAL,
-    DEFAULT_AUTO_RESET,
-    DEFAULT_AUTO_RESET_DELAY,
+    DEFAULT_AUTO_STOP,
+    DEFAULT_AUTO_STOP_DELAY,
     DEFAULT_GRACE_PERIOD,
     DEFAULT_INTERVAL,
     DEFAULT_RUNNING_STATES,
     DEFAULT_UPDATE_INTERVAL,
     DOMAIN,
-    MAX_AUTO_RESET_DELAY,
+    MAX_AUTO_STOP_DELAY,
     MAX_GRACE_PERIOD,
     MAX_INTERVAL,
     MAX_UPDATE_INTERVAL,
@@ -55,7 +55,7 @@ DURATION_OPTIONS = (
     CONF_INTERVAL,
     CONF_UPDATE_INTERVAL,
     CONF_GRACE_PERIOD,
-    CONF_AUTO_RESET_DELAY,
+    CONF_AUTO_STOP_DELAY,
 )
 
 DEFAULTS: dict[str, Any] = {
@@ -63,8 +63,8 @@ DEFAULTS: dict[str, Any] = {
     CONF_UPDATE_INTERVAL: DEFAULT_UPDATE_INTERVAL,
     CONF_RUNNING_STATES: DEFAULT_RUNNING_STATES,
     CONF_GRACE_PERIOD: DEFAULT_GRACE_PERIOD,
-    CONF_AUTO_RESET: DEFAULT_AUTO_RESET,
-    CONF_AUTO_RESET_DELAY: DEFAULT_AUTO_RESET_DELAY,
+    CONF_AUTO_STOP: DEFAULT_AUTO_STOP,
+    CONF_AUTO_STOP_DELAY: DEFAULT_AUTO_STOP_DELAY,
 }
 
 
@@ -94,8 +94,8 @@ def _options_schema(collapsed: bool) -> dict[vol.Marker, Any]:
                 )
             ),
             vol.Optional(CONF_GRACE_PERIOD): DurationSelector(),
-            vol.Optional(CONF_AUTO_RESET): BooleanSelector(),
-            vol.Optional(CONF_AUTO_RESET_DELAY): DurationSelector(),
+            vol.Optional(CONF_AUTO_STOP): BooleanSelector(),
+            vol.Optional(CONF_AUTO_STOP_DELAY): DurationSelector(),
         }
     )
     # All fields are optional: values that are not sent keep their current value
@@ -115,8 +115,8 @@ def _form_values(options: dict[str, Any]) -> dict[str, Any]:
         CONF_SOURCE_ENTITY,
         CONF_RUNNING_STATES,
         CONF_GRACE_PERIOD,
-        CONF_AUTO_RESET,
-        CONF_AUTO_RESET_DELAY,
+        CONF_AUTO_STOP,
+        CONF_AUTO_STOP_DELAY,
     )
     source = {key: values.pop(key) for key in source_keys if key in values}
     return {**values, SECTION_SOURCE: source}
@@ -148,7 +148,7 @@ def _validate_options(
     options[CONF_RUNNING_STATES] = [
         state.strip() for state in values.get(CONF_RUNNING_STATES, []) if state.strip()
     ]
-    options[CONF_AUTO_RESET] = bool(values.get(CONF_AUTO_RESET, DEFAULT_AUTO_RESET))
+    options[CONF_AUTO_STOP] = bool(values.get(CONF_AUTO_STOP, DEFAULT_AUTO_STOP))
     if values.get(CONF_SOURCE_ENTITY):
         options[CONF_SOURCE_ENTITY] = values[CONF_SOURCE_ENTITY]
 
@@ -162,8 +162,8 @@ def _validate_options(
         errors["base"] = "running_states_required"
     elif options[CONF_GRACE_PERIOD] > MAX_GRACE_PERIOD:
         errors["base"] = "grace_period_too_long"
-    elif options[CONF_AUTO_RESET_DELAY] > MAX_AUTO_RESET_DELAY:
-        errors["base"] = "auto_reset_delay_too_long"
+    elif options[CONF_AUTO_STOP_DELAY] > MAX_AUTO_STOP_DELAY:
+        errors["base"] = "auto_stop_delay_too_long"
     return options, errors
 
 

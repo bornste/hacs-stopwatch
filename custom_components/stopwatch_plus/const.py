@@ -20,15 +20,15 @@ MAX_UPDATE_INTERVAL: Final = 3600
 CONF_SOURCE_ENTITY: Final = "source_entity"
 CONF_RUNNING_STATES: Final = "running_states"
 CONF_GRACE_PERIOD: Final = "grace_period"
-CONF_AUTO_RESET: Final = "auto_reset"
-CONF_AUTO_RESET_DELAY: Final = "auto_reset_delay"
+CONF_AUTO_STOP: Final = "auto_stop"
+CONF_AUTO_STOP_DELAY: Final = "auto_stop_delay"
 
 DEFAULT_RUNNING_STATES: Final = ["playing", "on"]
 DEFAULT_GRACE_PERIOD: Final = 120
 MAX_GRACE_PERIOD: Final = 3600
-DEFAULT_AUTO_RESET: Final = False
-DEFAULT_AUTO_RESET_DELAY: Final = 1800
-MAX_AUTO_RESET_DELAY: Final = 7 * 24 * 3600
+DEFAULT_AUTO_STOP: Final = False
+DEFAULT_AUTO_STOP_DELAY: Final = 1800
+MAX_AUTO_STOP_DELAY: Final = 7 * 24 * 3600
 
 # Status of a stopwatch
 STATUS_IDLE: Final = "idle"
@@ -58,7 +58,7 @@ EVENT_TYPES: Final = [
 SOURCE_ACTION: Final = "action"
 SOURCE_BUTTON: Final = "button"
 SOURCE_SOURCE_ENTITY: Final = "source_entity"
-SOURCE_AUTO_RESET: Final = "auto_reset"
+SOURCE_AUTO_STOP: Final = "auto_stop"
 
 # Actions
 SERVICE_START: Final = "start"
@@ -70,6 +70,7 @@ SERVICE_TOGGLE: Final = "toggle"
 # Unique id suffixes (also used as translation keys)
 KEY_ELAPSED: Final = "elapsed"
 KEY_STATUS: Final = "status"
+KEY_LAST_SESSION: Final = "last_session"
 KEY_START: Final = "start"
 KEY_PAUSE: Final = "pause"
 KEY_STOP: Final = "stop"
