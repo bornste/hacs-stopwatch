@@ -6,8 +6,8 @@ Usage, from the repository root:
     python docs/brand/generate.py path/to/ReadexPro-SemiBold.ttf
 
 The icon SVGs and the social preview for GitHub (social-preview.png, 1280x640) are
-written to docs/brand; the other PNG files go to custom_components/stopwatch_plus/brand. Readex Pro (weight 600, SemiBold) is available
-from Google Fonts.
+written to docs/brand; the other PNG files go to custom_components/stopwatch_plus/brand.
+Readex Pro (weight 600, SemiBold) is available from Google Fonts.
 """
 
 from __future__ import annotations
