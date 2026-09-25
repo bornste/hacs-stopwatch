@@ -35,7 +35,7 @@ async def async_setup_entry(
 
 
 class StopwatchEventEntity(StopwatchEntity, EventEntity):
-    """Reports started, paused, resumed, reset and interval events."""
+    """Reports started, paused, resumed, stopped, reset and interval events."""
 
     _attr_event_types = EVENT_TYPES
 

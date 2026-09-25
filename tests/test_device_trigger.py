@@ -17,7 +17,14 @@ from .conftest import ELAPSED, PAUSE, START
 
 pytestmark = pytest.mark.usefixtures("setup_stopwatch")
 
-TRIGGER_TYPES = ["started", "paused", "resumed", "reset", "interval"]
+TRIGGER_TYPES = [
+    "started",
+    "paused",
+    "resumed",
+    "stopped",
+    "reset",
+    "interval",
+]
 
 
 def _device_id(hass: HomeAssistant) -> str:

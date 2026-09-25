@@ -42,19 +42,22 @@ Entity IDs are derived from the English entity names, whatever the language of t
 - `sensor.<name>_status` – enum: `idle` / `running` / `paused` (translated).
 - `button.<name>_start` – starts or resumes.
 - `button.<name>_pause`
-- `button.<name>_reset`
+- `button.<name>_stop` – stops and sets back to zero (`idle`).
+- `button.<name>_reset` – sets back to zero; a running stopwatch keeps running.
 - `button.<name>_start_pause` – pauses when running, otherwise starts or resumes (like `stopwatch_plus.toggle`).
-- `event.<name>_events` – reports every stopwatch event (event types `started`, `paused`, `resumed`, `reset`, `interval`); attributes: `elapsed_seconds`, `elapsed_formatted`, `interval_count`, `source`.
+- `event.<name>_events` – reports every stopwatch event (event types `started`, `paused`, `resumed`, `stopped`, `reset`, `interval`); attributes: `elapsed_seconds`, `elapsed_formatted`, `interval_count`, `source`.
 
 ## Actions
 
-`stopwatch_plus.start` (also resumes), `stopwatch_plus.pause`, `stopwatch_plus.reset`, `stopwatch_plus.toggle` – target: stopwatch entity or device.
+`stopwatch_plus.start` (also resumes), `stopwatch_plus.pause`, `stopwatch_plus.stop`, `stopwatch_plus.reset`, `stopwatch_plus.toggle` – target: stopwatch entity or device.
 
 Each call acts once per stopwatch, even if the target resolves to several entities of the same stopwatch (e.g. when a device is targeted).
 
-`reset` sets the elapsed time to 0 and the status to `idle`, regardless of the previous status.
+`stop` sets the elapsed time to 0 and the status to `idle`, whether running or paused.
 
-Commands without effect (starting a running stopwatch, pausing a stopwatch that is not running, resetting an idle one) do nothing and fire no event. An action whose target contains no loaded stopwatch raises a validation error.
+`reset` sets the elapsed time to 0. A running stopwatch keeps running and counts again from zero (`started_at` and the interval count start anew); a paused one goes to `idle`, like `stop`.
+
+Commands without effect (starting a running stopwatch, pausing a stopwatch that is not running, stopping or resetting an idle one) do nothing and fire no event. An action whose target contains no loaded stopwatch raises a validation error.
 
 ## Source entity
 
@@ -94,7 +97,8 @@ One event type on the Home Assistant event bus: `stopwatch_plus_event`.
 | `started` | Started from `idle` |
 | `paused` | Paused |
 | `resumed` | Resumed from `paused` |
-| `reset` | Reset (manually or by auto-reset) |
+| `stopped` | Stopped and set back to zero |
+| `reset` | Set back to zero (manually or by auto-reset); a running stopwatch keeps running |
 | `interval` | An interval of running time has been reached |
 
 Event data: `type`, `entity_id`, `device_id`, `name`, `elapsed_seconds`, `elapsed_formatted` (see below), `interval_count`, `source` (`action`, `button`, `source_entity`, `auto_reset`; `null` for `interval` events). For `interval` events, `elapsed_seconds` is the exact threshold (e.g. 3600), not the slightly later firing time.
@@ -150,7 +154,7 @@ CHANGELOG.md
 
 1. **Manual stopwatch** – done: state logic with restore, sensors, buttons, actions, events incl. intervals, config and options flow (name, interval, update interval), tests for the minimum and the latest Home Assistant. After the first test: intervals in seconds, integration instead of helper.
 2. **Source entity** – done: binding with running states, grace period with backdated pause, auto-reset for new sessions, persisted across restarts; settings in a collapsible "Source entity" section of the config and options flow.
-3. **Device triggers** – done: one device trigger per event type (`started`, `paused`, `resumed`, `reset`, `interval`), based on `stopwatch_plus_event` filtered by `device_id` and `type`; translated names in English and German.
+3. **Device triggers** – done: one device trigger per event type (`started`, `paused`, `resumed`, `stopped`, `reset`, `interval`), based on `stopwatch_plus_event` filtered by `device_id` and `type`; translated names in English and German.
 4. Dashboard card with live counting.
 5. Icon, first release v0.1.0, submission to HACS.
 

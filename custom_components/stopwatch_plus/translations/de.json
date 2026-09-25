@@ -94,6 +94,9 @@
       "pause": {
         "name": "Pause"
       },
+      "stop": {
+        "name": "Stopp"
+      },
       "reset": {
         "name": "Zurücksetzen"
       },
@@ -148,6 +151,7 @@
               "started": "Gestartet",
               "paused": "Pausiert",
               "resumed": "Fortgesetzt",
+              "stopped": "Gestoppt",
               "reset": "Zurückgesetzt",
               "interval": "Intervall erreicht"
             }
@@ -188,9 +192,13 @@
       "name": "Pausieren",
       "description": "Pausiert die ausgewählten Stoppuhren."
     },
+    "stop": {
+      "name": "Stoppen",
+      "description": "Hält die ausgewählten Stoppuhren an und setzt sie auf null zurück."
+    },
     "reset": {
       "name": "Zurücksetzen",
-      "description": "Setzt die ausgewählten Stoppuhren auf null zurück und hält sie an."
+      "description": "Setzt die ausgewählten Stoppuhren auf null zurück. Laufende Stoppuhren laufen weiter und zählen wieder ab null, pausierte werden angehalten."
     },
     "toggle": {
       "name": "Umschalten",
@@ -202,6 +210,7 @@
       "started": "Stoppuhr gestartet",
       "paused": "Stoppuhr pausiert",
       "resumed": "Stoppuhr fortgesetzt",
+      "stopped": "Stoppuhr gestoppt",
       "reset": "Stoppuhr zurückgesetzt",
       "interval": "Intervall erreicht"
     }

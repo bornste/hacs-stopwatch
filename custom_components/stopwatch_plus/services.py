@@ -13,6 +13,7 @@ from .const import (
     SERVICE_PAUSE,
     SERVICE_RESET,
     SERVICE_START,
+    SERVICE_STOP,
     SERVICE_TOGGLE,
     SOURCE_ACTION,
 )
@@ -60,6 +61,10 @@ def async_setup_services(hass: HomeAssistant) -> None:
         for stopwatch in await _async_get_stopwatches(call):
             stopwatch.async_pause(SOURCE_ACTION)
 
+    async def async_stop(call: ServiceCall) -> None:
+        for stopwatch in await _async_get_stopwatches(call):
+            stopwatch.async_stop(SOURCE_ACTION)
+
     async def async_reset(call: ServiceCall) -> None:
         for stopwatch in await _async_get_stopwatches(call):
             stopwatch.async_reset(SOURCE_ACTION)
@@ -71,6 +76,7 @@ def async_setup_services(hass: HomeAssistant) -> None:
     for name, handler in (
         (SERVICE_START, async_start),
         (SERVICE_PAUSE, async_pause),
+        (SERVICE_STOP, async_stop),
         (SERVICE_RESET, async_reset),
         (SERVICE_TOGGLE, async_toggle),
     ):

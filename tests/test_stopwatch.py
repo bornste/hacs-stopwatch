@@ -23,7 +23,7 @@ from homeassistant.core import Event, HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import entity_registry as er
 
-from .conftest import ELAPSED, PAUSE, RESET, START, STATUS
+from .conftest import ELAPSED, PAUSE, RESET, START, STATUS, STOP
 
 pytestmark = pytest.mark.usefixtures("setup_stopwatch")
 
@@ -62,7 +62,7 @@ async def test_initial_state(hass: HomeAssistant) -> None:
     assert elapsed.attributes["unit_of_measurement"] == "s"
     assert elapsed.attributes["status"] == "idle"
     assert hass.states.get(STATUS).state == "idle"
-    for button in (START, PAUSE, RESET):
+    for button in (START, PAUSE, STOP, RESET):
         assert hass.states.get(button) is not None
 
 
@@ -108,6 +108,7 @@ async def test_commands_without_effect_fire_no_event(
 ) -> None:
     """Pausing or resetting an idle stopwatch and starting twice do nothing."""
     await _press(hass, PAUSE)
+    await _press(hass, STOP)
     await _press(hass, RESET)
     await _press(hass, START)
     await _press(hass, START)
@@ -328,4 +329,62 @@ async def test_toggle_button(hass: HomeAssistant, events: list[Event]) -> None:
         ("started", "button"),
         ("paused", "button"),
         ("resumed", "button"),
+    ]
+
+
+async def test_stop_while_running(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, events: list[Event]
+) -> None:
+    """Stop goes back to idle at zero, also while running."""
+    await _press(hass, START)
+    await _advance(hass, freezer, 60)
+    await _press(hass, STOP)
+    assert hass.states.get(STATUS).state == "idle"
+    assert _elapsed(hass) == 0
+    assert hass.states.get(ELAPSED).attributes["started_at"] is None
+    assert events[-1].data["type"] == "stopped"
+    assert events[-1].data["elapsed_seconds"] == 0
+
+    # The next start is a new session
+    await _press(hass, START)
+    assert events[-1].data["type"] == "started"
+
+
+@pytest.mark.parametrize("options", [{CONF_INTERVAL: 60, CONF_UPDATE_INTERVAL: 60}])
+async def test_reset_while_running_keeps_running(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, events: list[Event]
+) -> None:
+    """Reset while running counts again from zero, intervals included."""
+    await _press(hass, START)
+    await _advance(hass, freezer, 90)
+    await _press(hass, RESET)
+    assert hass.states.get(STATUS).state == "running"
+    assert _elapsed(hass) == 0
+    assert hass.states.get(ELAPSED).attributes["interval_count"] == 0
+    assert [e.data["type"] for e in events] == ["started", "interval", "reset"]
+
+    # The next interval is one minute after the reset, not after the start
+    await _advance(hass, freezer, 30)
+    assert events[-1].data["type"] == "reset"
+    await _advance(hass, freezer, 30)
+    assert events[-1].data["type"] == "interval"
+    assert events[-1].data["interval_count"] == 1
+    assert _elapsed(hass) == 60
+
+
+async def test_stop_and_reset_actions(
+    hass: HomeAssistant, freezer: FrozenDateTimeFactory, events: list[Event]
+) -> None:
+    """The stop and reset actions work like the buttons."""
+    target = {"entity_id": ELAPSED}
+    await _action(hass, "start", target)
+    await _advance(hass, freezer, 10)
+    await _action(hass, "reset", target)
+    assert hass.states.get(STATUS).state == "running"
+    await _action(hass, "stop", target)
+    assert hass.states.get(STATUS).state == "idle"
+    assert [(e.data["type"], e.data["source"]) for e in events] == [
+        ("started", "action"),
+        ("reset", "action"),
+        ("stopped", "action"),
     ]

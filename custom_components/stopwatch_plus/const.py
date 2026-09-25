@@ -42,12 +42,14 @@ EVENT_STOPWATCH: Final = f"{DOMAIN}_event"
 EVENT_TYPE_STARTED: Final = "started"
 EVENT_TYPE_PAUSED: Final = "paused"
 EVENT_TYPE_RESUMED: Final = "resumed"
+EVENT_TYPE_STOPPED: Final = "stopped"
 EVENT_TYPE_RESET: Final = "reset"
 EVENT_TYPE_INTERVAL: Final = "interval"
 EVENT_TYPES: Final = [
     EVENT_TYPE_STARTED,
     EVENT_TYPE_PAUSED,
     EVENT_TYPE_RESUMED,
+    EVENT_TYPE_STOPPED,
     EVENT_TYPE_RESET,
     EVENT_TYPE_INTERVAL,
 ]
@@ -61,6 +63,7 @@ SOURCE_AUTO_RESET: Final = "auto_reset"
 # Actions
 SERVICE_START: Final = "start"
 SERVICE_PAUSE: Final = "pause"
+SERVICE_STOP: Final = "stop"
 SERVICE_RESET: Final = "reset"
 SERVICE_TOGGLE: Final = "toggle"
 
@@ -69,6 +72,7 @@ KEY_ELAPSED: Final = "elapsed"
 KEY_STATUS: Final = "status"
 KEY_START: Final = "start"
 KEY_PAUSE: Final = "pause"
+KEY_STOP: Final = "stop"
 KEY_RESET: Final = "reset"
 KEY_TOGGLE: Final = "toggle"
 KEY_EVENTS: Final = "events"

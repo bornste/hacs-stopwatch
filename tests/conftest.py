@@ -19,6 +19,7 @@ ELAPSED = "sensor.gaming_elapsed_time"
 STATUS = "sensor.gaming_status"
 START = "button.gaming_start"
 PAUSE = "button.gaming_pause"
+STOP = "button.gaming_stop"
 RESET = "button.gaming_reset"
 
 

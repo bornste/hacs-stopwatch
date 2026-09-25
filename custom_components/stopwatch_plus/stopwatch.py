@@ -24,6 +24,7 @@ from .const import (
     EVENT_TYPE_RESET,
     EVENT_TYPE_RESUMED,
     EVENT_TYPE_STARTED,
+    EVENT_TYPE_STOPPED,
     KEY_ELAPSED,
     STATUS_IDLE,
     STATUS_PAUSED,
@@ -256,19 +257,46 @@ class Stopwatch:
         self._fire_event(EVENT_TYPE_PAUSED, source)
 
     @callback
-    def async_reset(self, source: str) -> None:
-        """Reset the stopwatch to zero and stop it."""
+    def async_stop(self, source: str) -> None:
+        """Stop the stopwatch and set it back to zero."""
         if self.status == STATUS_IDLE:
             return
 
+        self._clear()
+        self._changed()
+        self._fire_event(EVENT_TYPE_STOPPED, source)
+
+    @callback
+    def async_reset(self, source: str) -> None:
+        """Set the stopwatch back to zero.
+
+        A running stopwatch keeps running and counts again from zero, a paused
+        one is stopped, since a pause at zero would make no sense.
+        """
+        if self.status == STATUS_IDLE:
+            return
+
+        if self.status == STATUS_RUNNING:
+            now = dt_util.utcnow()
+            self.accumulated_seconds = 0.0
+            self.running_since = now
+            self.started_at = now
+            self.interval_count = 0
+            self._schedule()
+        else:
+            self._clear()
+        self._changed()
+        self._fire_event(EVENT_TYPE_RESET, source)
+
+    @callback
+    def _clear(self) -> None:
+        """Go back to idle at zero."""
         self.status = STATUS_IDLE
         self.accumulated_seconds = 0.0
         self.running_since = None
         self.started_at = None
         self.interval_count = 0
         self._unschedule()
-        self._changed()
-        self._fire_event(EVENT_TYPE_RESET, source)
 
     @callback
     def async_toggle(self, source: str) -> None:

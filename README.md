@@ -9,29 +9,36 @@
 
 The stopwatch with the plus – in case Home Assistant adds its own one day.
 
-[![Tests](https://img.shields.io/github/actions/workflow/status/bornste/hacs-stopwatch/tests.yml?branch=main&label=Tests&logo=github&style=for-the-badge)](https://github.com/bornste/hacs-stopwatch/actions/workflows/tests.yml)
-[![Validate](https://img.shields.io/github/actions/workflow/status/bornste/hacs-stopwatch/validate.yml?branch=main&label=Validate&logo=github&style=for-the-badge)](https://github.com/bornste/hacs-stopwatch/actions/workflows/validate.yml)
-[![Release](https://img.shields.io/github/v/release/bornste/hacs-stopwatch?include_prereleases&sort=semver&style=for-the-badge)](https://github.com/bornste/hacs-stopwatch/releases)
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange?style=for-the-badge)](https://hacs.xyz/docs/faq/custom_repositories/)
-[![Home Assistant](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbornste%2Fhacs-stopwatch%2Fmain%2Fhacs.json&query=%24.homeassistant&label=Home%20Assistant&suffix=%2B&color=41BDF5&logo=homeassistant&logoColor=white&style=for-the-badge)](https://www.home-assistant.io/)
-[![License](https://img.shields.io/github/license/bornste/hacs-stopwatch?style=for-the-badge)](LICENSE)
-[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20me-FF5E5B?logo=ko-fi&logoColor=white&style=for-the-badge)](https://ko-fi.com/bornste)
+[![Tests](https://img.shields.io/github/actions/workflow/status/bornste/hacs-stopwatch/tests.yml?branch=main&label=Tests&logo=github&style=flat-square)](https://github.com/bornste/hacs-stopwatch/actions/workflows/tests.yml)
+[![Validate](https://img.shields.io/github/actions/workflow/status/bornste/hacs-stopwatch/validate.yml?branch=main&label=Validate&logo=github&style=flat-square)](https://github.com/bornste/hacs-stopwatch/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/bornste/hacs-stopwatch?include_prereleases&sort=semver&style=flat-square)](https://github.com/bornste/hacs-stopwatch/releases)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange?style=flat-square)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![Home Assistant](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbornste%2Fhacs-stopwatch%2Fmain%2Fhacs.json&query=%24.homeassistant&label=Home%20Assistant&suffix=%2B&color=41BDF5&logo=homeassistant&logoColor=white&style=flat-square)](https://www.home-assistant.io/)
+[![License](https://img.shields.io/github/license/bornste/hacs-stopwatch?style=flat-square)](LICENSE)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20me-FF5E5B?logo=ko-fi&logoColor=white&style=flat-square)](https://ko-fi.com/bornste)
 
-> [!WARNING]
-> In development – not yet ready for use.
+> [!NOTE]
+> Early version (0.x): ready to use, but details may still change until 1.0. Feedback and ideas are welcome in the [issues](https://github.com/bornste/hacs-stopwatch/issues).
 
 A stopwatch integration for [Home Assistant](https://www.home-assistant.io/) that counts **up**, can be paused and resumed, and fires events at configurable intervals of running time. Home Assistant's built-in `timer` only counts down; Stopwatch Plus fills that gap.
 
-## Planned features
+## Features
 
-- Any number of stopwatches, each set up as its own device (e.g. "Gaming", "Work time", "TV on").
-- Actions `stopwatch_plus.start` (also resumes), `stopwatch_plus.pause`, `stopwatch_plus.reset` and `stopwatch_plus.toggle`, plus buttons for each stopwatch (Start, Pause, Reset and a combined Start/Pause).
-- A duration sensor with the elapsed time, and a status sensor (`idle`, `running`, `paused`).
-- Optional binding to a source entity: the stopwatch runs while that entity is in one of the chosen states (e.g. `media_player.xbox` is `playing`) and pauses otherwise.
-- Interval events based on running time only (pauses do not count), available as a device trigger in the automation editor – for example to announce "You have been playing for 60 minutes".
-- State survives Home Assistant restarts.
-- Configurable sensor update interval to keep the database small, with a bundled dashboard card that counts live in the browser.
-- English and German translations.
+- **Any number of stopwatches**, each set up as its own device (e.g. "Gaming", "Work time", "TV on").
+- **Buttons** for each stopwatch: Start, Pause, Stop, Reset and a combined Start/Pause – ready for dashboards.
+- **Actions** `stopwatch_plus.start` (also resumes), `stopwatch_plus.pause`, `stopwatch_plus.stop`, `stopwatch_plus.reset` and `stopwatch_plus.toggle`, with a stopwatch entity or device as target.
+- **Sensors:** the elapsed time as a duration sensor (with an `HH:MM:SS` attribute) and the status (`idle`, `running`, `paused`).
+- **Follow a source entity** (optional): the stopwatch runs while an entity is in one of the chosen states (e.g. `media_player.xbox` is `playing`) and pauses otherwise – with a grace period for short dropouts and an optional auto-reset for new sessions.
+- **Interval events** based on running time only (pauses do not count) – for example to announce "You have been playing for 60 minutes".
+- **Automation triggers without typing:** every event is available as a device trigger and via the event entity in the trigger *Event received*.
+- **Survives restarts:** the state is kept when Home Assistant restarts; a running stopwatch keeps counting.
+- **Database-friendly:** the sensor update interval is configurable (default 60 seconds).
+- English and German translations, icon and logo.
+
+## Roadmap
+
+- A bundled dashboard card that counts live in the browser, independent of the sensor update interval.
+- Inclusion in the default HACS store.
 
 ## How it works
 
@@ -42,8 +49,12 @@ A stopwatch is always in one of three states: `idle` (at zero), `running` or `pa
 | Start | `idle` | `running` | `started` |
 | Start (resume) | `paused` | `running` | `resumed` |
 | Pause | `running` | `paused` | `paused` |
-| Reset | `running` or `paused` | `idle` | `reset` |
+| Stop | `running` or `paused` | `idle` | `stopped` |
+| Reset | `running` | `running`, again from zero | `reset` |
+| Reset | `paused` | `idle` | `reset` |
 | An interval of running time is reached | `running` | `running` | `interval` |
+
+*Stop* ends the session: back to zero and idle. *Reset* only sets the time back to zero – a running stopwatch keeps counting from there; a paused one is stopped, as a pause at zero would make no sense.
 
 Commands without effect, such as pausing a stopwatch that is not running, do nothing and fire no event. Only running time counts: pauses are not added to the elapsed time, and interval events fire after every full interval of running time.
 
@@ -64,7 +75,7 @@ Buttons and actions keep working while a source is set.
 
 ### Resetting at a fixed time
 
-Without auto-reset, a stopwatch is only reset by its reset button, the action `stopwatch_plus.reset` or an automation – a restart of Home Assistant keeps the time. To start from zero every day, for example, reset it with a time trigger (this can be combined with auto-reset):
+Without auto-reset, a stopwatch is only set back to zero by its Stop or Reset button, the actions `stopwatch_plus.stop` and `stopwatch_plus.reset` or an automation – a restart of Home Assistant keeps the time. To start from zero every day, for example, reset it with a time trigger (this can be combined with auto-reset). If it happens to be running at that moment, it keeps running from zero; use `stopwatch_plus.stop` instead to stop it:
 
 ```yaml
 alias: Reset the gaming stopwatch every morning
@@ -137,7 +148,7 @@ See [docs/development.md](docs/development.md) for the local development instanc
 
 If Stopwatch Plus is useful to you, you can buy me a coffee on Ko-fi. Thank you!
 
-[![Support me on Ko-fi](https://img.shields.io/badge/Buy%20me%20a%20coffee-Ko--fi-FF5E5B?logo=ko-fi&logoColor=white&style=for-the-badge)](https://ko-fi.com/bornste)
+[![Support me on Ko-fi](https://img.shields.io/badge/Buy%20me%20a%20coffee-Ko--fi-FF5E5B?logo=ko-fi&logoColor=white&style=flat-square)](https://ko-fi.com/bornste)
 
 ## License
 

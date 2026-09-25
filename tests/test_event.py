@@ -43,6 +43,7 @@ async def test_event_entity(hass: HomeAssistant) -> None:
         "started",
         "paused",
         "resumed",
+        "stopped",
         "reset",
         "interval",
     ]

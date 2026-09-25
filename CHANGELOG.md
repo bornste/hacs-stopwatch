@@ -4,12 +4,19 @@ All notable changes to Stopwatch Plus are documented here. The format follows [K
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-09-25
+
 ### Added
 
-- Device triggers for every event type (*Stopwatch started*, *paused*, *resumed*, *reset* and *Interval reached*), selectable in the automation editor without typing the event name. `trigger.event.data` holds the same values as the event.
+- Device triggers for every event type (*Stopwatch started*, *paused*, *resumed*, *stopped*, *reset* and *Interval reached*), selectable in the automation editor without typing the event name. `trigger.event.data` holds the same values as the event.
 - Event entity per stopwatch (e.g. `event.gaming_events`) that reports every stopwatch event with its data as attributes. It makes the events available in Home Assistant's entity-based trigger *Event received* (with the stopwatch as target) and shows them in the logbook.
 - Button *Start/Pause* per stopwatch (e.g. `button.gaming_start_pause`): pauses a running stopwatch, otherwise starts or resumes it. Handy for a single dashboard button.
+- Button *Stop* and action `stopwatch_plus.stop`: stops the stopwatch and sets it back to zero (status `idle`), with the new event type `stopped`.
 - Icons for all buttons, sensors, the event entity and the actions.
+
+### Changed
+
+- **Breaking:** *Reset* (button and action `stopwatch_plus.reset`) no longer stops a running stopwatch: it sets the time back to zero and keeps counting. A paused stopwatch is still stopped. Use the new *Stop* to stop and reset in one step.
 
 ## [0.1.0] - 2026-09-24
 
@@ -29,5 +36,6 @@ First pre-release.
 - English and German translations.
 - Icon and logo, light and dark (shown from Home Assistant 2026.3 on).
 
-[Unreleased]: https://github.com/bornste/hacs-stopwatch/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/bornste/hacs-stopwatch/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/bornste/hacs-stopwatch/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bornste/hacs-stopwatch/releases/tag/v0.1.0

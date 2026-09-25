@@ -7,6 +7,9 @@
       "pause": {
         "default": "mdi:pause"
       },
+      "stop": {
+        "default": "mdi:stop"
+      },
       "reset": {
         "default": "mdi:restore"
       },
@@ -39,6 +42,9 @@
     },
     "pause": {
       "service": "mdi:pause"
+    },
+    "stop": {
+      "service": "mdi:stop"
     },
     "reset": {
       "service": "mdi:restore"

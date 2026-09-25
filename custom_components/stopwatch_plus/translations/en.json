@@ -94,6 +94,9 @@
       "pause": {
         "name": "Pause"
       },
+      "stop": {
+        "name": "Stop"
+      },
       "reset": {
         "name": "Reset"
       },
@@ -148,6 +151,7 @@
               "started": "Started",
               "paused": "Paused",
               "resumed": "Resumed",
+              "stopped": "Stopped",
               "reset": "Reset",
               "interval": "Interval reached"
             }
@@ -188,9 +192,13 @@
       "name": "Pause",
       "description": "Pauses the targeted stopwatches."
     },
+    "stop": {
+      "name": "Stop",
+      "description": "Stops the targeted stopwatches and sets them back to zero."
+    },
     "reset": {
       "name": "Reset",
-      "description": "Resets the targeted stopwatches to zero and stops them."
+      "description": "Sets the targeted stopwatches back to zero. Running stopwatches keep running and count again from zero, paused ones are stopped."
     },
     "toggle": {
       "name": "Toggle",
@@ -202,6 +210,7 @@
       "started": "Stopwatch started",
       "paused": "Stopwatch paused",
       "resumed": "Stopwatch resumed",
+      "stopped": "Stopwatch stopped",
       "reset": "Stopwatch reset",
       "interval": "Interval reached"
     }
