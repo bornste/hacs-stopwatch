@@ -96,6 +96,9 @@
       },
       "reset": {
         "name": "Zurücksetzen"
+      },
+      "toggle": {
+        "name": "Start/Pause"
       }
     },
     "sensor": {
@@ -133,6 +136,40 @@
           "idle": "Bereit",
           "running": "Läuft",
           "paused": "Pausiert"
+        }
+      }
+    },
+    "event": {
+      "events": {
+        "name": "Ereignisse",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "started": "Gestartet",
+              "paused": "Pausiert",
+              "resumed": "Fortgesetzt",
+              "reset": "Zurückgesetzt",
+              "interval": "Intervall erreicht"
+            }
+          },
+          "elapsed_seconds": {
+            "name": "Laufzeit in Sekunden"
+          },
+          "elapsed_formatted": {
+            "name": "Laufzeit (formatiert)"
+          },
+          "interval_count": {
+            "name": "Anzahl Intervalle"
+          },
+          "source": {
+            "name": "Auslöser",
+            "state": {
+              "action": "Aktion",
+              "button": "Button",
+              "source_entity": "Quell-Entität",
+              "auto_reset": "Automatisches Zurücksetzen"
+            }
+          }
         }
       }
     }

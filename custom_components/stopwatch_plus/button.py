@@ -8,7 +8,7 @@ from homeassistant.components.button import ButtonEntity
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import KEY_PAUSE, KEY_RESET, KEY_START, SOURCE_BUTTON
+from .const import KEY_PAUSE, KEY_RESET, KEY_START, KEY_TOGGLE, SOURCE_BUTTON
 from .entity import StopwatchEntity
 
 if TYPE_CHECKING:
@@ -29,6 +29,7 @@ async def async_setup_entry(
             StopwatchStartButton(stopwatch, KEY_START),
             StopwatchPauseButton(stopwatch, KEY_PAUSE),
             StopwatchResetButton(stopwatch, KEY_RESET),
+            StopwatchToggleButton(stopwatch, KEY_TOGGLE),
         ]
     )
 
@@ -55,3 +56,11 @@ class StopwatchResetButton(StopwatchEntity, ButtonEntity):
     async def async_press(self) -> None:
         """Handle the button press."""
         self._stopwatch.async_reset(SOURCE_BUTTON)
+
+
+class StopwatchToggleButton(StopwatchEntity, ButtonEntity):
+    """Pauses the stopwatch when it is running, otherwise starts it."""
+
+    async def async_press(self) -> None:
+        """Handle the button press."""
+        self._stopwatch.async_toggle(SOURCE_BUTTON)

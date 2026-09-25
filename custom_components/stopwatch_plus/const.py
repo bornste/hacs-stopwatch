@@ -44,6 +44,13 @@ EVENT_TYPE_PAUSED: Final = "paused"
 EVENT_TYPE_RESUMED: Final = "resumed"
 EVENT_TYPE_RESET: Final = "reset"
 EVENT_TYPE_INTERVAL: Final = "interval"
+EVENT_TYPES: Final = [
+    EVENT_TYPE_STARTED,
+    EVENT_TYPE_PAUSED,
+    EVENT_TYPE_RESUMED,
+    EVENT_TYPE_RESET,
+    EVENT_TYPE_INTERVAL,
+]
 
 # What caused a change
 SOURCE_ACTION: Final = "action"
@@ -63,3 +70,5 @@ KEY_STATUS: Final = "status"
 KEY_START: Final = "start"
 KEY_PAUSE: Final = "pause"
 KEY_RESET: Final = "reset"
+KEY_TOGGLE: Final = "toggle"
+KEY_EVENTS: Final = "events"

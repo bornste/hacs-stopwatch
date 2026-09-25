@@ -96,6 +96,9 @@
       },
       "reset": {
         "name": "Reset"
+      },
+      "toggle": {
+        "name": "Start/Pause"
       }
     },
     "sensor": {
@@ -133,6 +136,40 @@
           "idle": "Idle",
           "running": "Running",
           "paused": "Paused"
+        }
+      }
+    },
+    "event": {
+      "events": {
+        "name": "Events",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "started": "Started",
+              "paused": "Paused",
+              "resumed": "Resumed",
+              "reset": "Reset",
+              "interval": "Interval reached"
+            }
+          },
+          "elapsed_seconds": {
+            "name": "Elapsed seconds"
+          },
+          "elapsed_formatted": {
+            "name": "Elapsed time (formatted)"
+          },
+          "interval_count": {
+            "name": "Interval count"
+          },
+          "source": {
+            "name": "Source",
+            "state": {
+              "action": "Action",
+              "button": "Button",
+              "source_entity": "Source entity",
+              "auto_reset": "Auto-reset"
+            }
+          }
         }
       }
     }

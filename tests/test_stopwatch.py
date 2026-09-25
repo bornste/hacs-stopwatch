@@ -317,3 +317,15 @@ async def test_formatted_attribute_and_precision(
     assert "elapsed_formatted" in StopwatchElapsedSensor._unrecorded_attributes
     options = er.async_get(hass).async_get(ELAPSED).options
     assert options["sensor"]["suggested_display_precision"] == 0
+
+
+async def test_toggle_button(hass: HomeAssistant, events: list[Event]) -> None:
+    """The Start/Pause button starts, pauses and resumes."""
+    for expected in ("running", "paused", "running"):
+        await _press(hass, "button.gaming_start_pause")
+        assert hass.states.get(STATUS).state == expected
+    assert [(e.data["type"], e.data["source"]) for e in events] == [
+        ("started", "button"),
+        ("paused", "button"),
+        ("resumed", "button"),
+    ]

@@ -43,6 +43,8 @@ Entity IDs are derived from the English entity names, whatever the language of t
 - `button.<name>_start` – starts or resumes.
 - `button.<name>_pause`
 - `button.<name>_reset`
+- `button.<name>_start_pause` – pauses when running, otherwise starts or resumes (like `stopwatch_plus.toggle`).
+- `event.<name>_events` – reports every stopwatch event (event types `started`, `paused`, `resumed`, `reset`, `interval`); attributes: `elapsed_seconds`, `elapsed_formatted`, `interval_count`, `source`.
 
 ## Actions
 
@@ -98,6 +100,8 @@ One event type on the Home Assistant event bus: `stopwatch_plus_event`.
 Event data: `type`, `entity_id`, `device_id`, `name`, `elapsed_seconds`, `elapsed_formatted` (see below), `interval_count`, `source` (`action`, `button`, `source_entity`, `auto_reset`; `null` for `interval` events). For `interval` events, `elapsed_seconds` is the exact threshold (e.g. 3600), not the slightly later firing time.
 
 Each `type` is also available as its own device trigger in the automation editor ("Stopwatch started", "Interval reached", …). Interval events fire at the exact moment, independent of the sensor update interval. A state trigger on the status sensor remains possible as a generic alternative.
+
+In addition, the event entity makes the events usable with Home Assistant's entity-based trigger `event.received` ("Event received"), which the new trigger dialog offers for a target such as the stopwatch device. Entity-based triggers are a Labs preview up to about Home Assistant 2026.1 and standard in later versions; the classic device triggers work in all supported versions.
 
 An interval shorter than the sensor update interval is fine: interval events are scheduled independently and fire on time. Every interval event also refreshes the elapsed time sensor, so the sensor effectively updates at the shorter of both intervals (and writes to the database as often).
 

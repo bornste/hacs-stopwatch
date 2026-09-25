@@ -90,6 +90,7 @@ class Stopwatch:
 
         self._listeners: list[CALLBACK_TYPE] = []
         self._shutdown_callbacks: list[CALLBACK_TYPE] = []
+        self._event_listeners: list[Callable[[dict[str, Any]], None]] = []
         self._cancel_interval: CALLBACK_TYPE | None = None
         self._cancel_update: CALLBACK_TYPE | None = None
 
@@ -178,6 +179,19 @@ class Stopwatch:
         @callback
         def remove_listener() -> None:
             self._listeners.remove(update_callback)
+
+        return remove_listener
+
+    @callback
+    def async_add_event_listener(
+        self, event_callback: Callable[[dict[str, Any]], None]
+    ) -> Callable[[], None]:
+        """Register a callback that receives the data of every stopwatch event."""
+        self._event_listeners.append(event_callback)
+
+        @callback
+        def remove_listener() -> None:
+            self._event_listeners.remove(event_callback)
 
         return remove_listener
 
@@ -347,6 +361,9 @@ class Stopwatch:
         }
         _LOGGER.debug("Firing %s: %s", EVENT_STOPWATCH, data)
         self.hass.bus.async_fire(EVENT_STOPWATCH, data)
+        # The event entity passes the event on to the entity-based triggers
+        for event_callback in list(self._event_listeners):
+            event_callback(data)
 
 
 def _isoformat(value: datetime | None) -> str | None:

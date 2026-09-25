@@ -24,23 +24,9 @@ from homeassistant.core import CALLBACK_TYPE, HomeAssistant
 from homeassistant.helpers.trigger import TriggerActionType, TriggerInfo
 from homeassistant.helpers.typing import ConfigType
 
-from .const import (
-    DOMAIN,
-    EVENT_STOPWATCH,
-    EVENT_TYPE_INTERVAL,
-    EVENT_TYPE_PAUSED,
-    EVENT_TYPE_RESET,
-    EVENT_TYPE_RESUMED,
-    EVENT_TYPE_STARTED,
-)
+from .const import DOMAIN, EVENT_STOPWATCH, EVENT_TYPES
 
-TRIGGER_TYPES = [
-    EVENT_TYPE_STARTED,
-    EVENT_TYPE_PAUSED,
-    EVENT_TYPE_RESUMED,
-    EVENT_TYPE_RESET,
-    EVENT_TYPE_INTERVAL,
-]
+TRIGGER_TYPES = EVENT_TYPES
 
 TRIGGER_SCHEMA = DEVICE_TRIGGER_BASE_SCHEMA.extend(
     {vol.Required(CONF_TYPE): vol.In(TRIGGER_TYPES)}

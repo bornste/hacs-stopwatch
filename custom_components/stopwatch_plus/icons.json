@@ -1,0 +1,50 @@
+{
+  "entity": {
+    "button": {
+      "start": {
+        "default": "mdi:play"
+      },
+      "pause": {
+        "default": "mdi:pause"
+      },
+      "reset": {
+        "default": "mdi:restore"
+      },
+      "toggle": {
+        "default": "mdi:play-pause"
+      }
+    },
+    "sensor": {
+      "elapsed": {
+        "default": "mdi:timer-outline"
+      },
+      "status": {
+        "default": "mdi:timer-cog-outline",
+        "state": {
+          "idle": "mdi:timer-off-outline",
+          "running": "mdi:timer-play-outline",
+          "paused": "mdi:timer-pause-outline"
+        }
+      }
+    },
+    "event": {
+      "events": {
+        "default": "mdi:timer-alert-outline"
+      }
+    }
+  },
+  "services": {
+    "start": {
+      "service": "mdi:play"
+    },
+    "pause": {
+      "service": "mdi:pause"
+    },
+    "reset": {
+      "service": "mdi:restore"
+    },
+    "toggle": {
+      "service": "mdi:play-pause"
+    }
+  }
+}

@@ -9,12 +9,13 @@
 
 The stopwatch with the plus – in case Home Assistant adds its own one day.
 
-[![Tests](https://github.com/bornste/hacs-stopwatch/actions/workflows/tests.yml/badge.svg)](https://github.com/bornste/hacs-stopwatch/actions/workflows/tests.yml)
-[![Validate](https://github.com/bornste/hacs-stopwatch/actions/workflows/validate.yml/badge.svg)](https://github.com/bornste/hacs-stopwatch/actions/workflows/validate.yml)
-[![Release](https://img.shields.io/github/v/release/bornste/hacs-stopwatch?include_prereleases&sort=semver)](https://github.com/bornste/hacs-stopwatch/releases)
-[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange.svg)](https://hacs.xyz/docs/faq/custom_repositories/)
-[![Home Assistant](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbornste%2Fhacs-stopwatch%2Fmain%2Fhacs.json&query=%24.homeassistant&label=Home%20Assistant&suffix=%2B&color=41BDF5&logo=homeassistant&logoColor=white)](https://www.home-assistant.io/)
-[![License](https://img.shields.io/github/license/bornste/hacs-stopwatch)](LICENSE)
+[![Tests](https://img.shields.io/github/actions/workflow/status/bornste/hacs-stopwatch/tests.yml?branch=main&label=Tests&logo=github&style=for-the-badge)](https://github.com/bornste/hacs-stopwatch/actions/workflows/tests.yml)
+[![Validate](https://img.shields.io/github/actions/workflow/status/bornste/hacs-stopwatch/validate.yml?branch=main&label=Validate&logo=github&style=for-the-badge)](https://github.com/bornste/hacs-stopwatch/actions/workflows/validate.yml)
+[![Release](https://img.shields.io/github/v/release/bornste/hacs-stopwatch?include_prereleases&sort=semver&style=for-the-badge)](https://github.com/bornste/hacs-stopwatch/releases)
+[![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange?style=for-the-badge)](https://hacs.xyz/docs/faq/custom_repositories/)
+[![Home Assistant](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbornste%2Fhacs-stopwatch%2Fmain%2Fhacs.json&query=%24.homeassistant&label=Home%20Assistant&suffix=%2B&color=41BDF5&logo=homeassistant&logoColor=white&style=for-the-badge)](https://www.home-assistant.io/)
+[![License](https://img.shields.io/github/license/bornste/hacs-stopwatch?style=for-the-badge)](LICENSE)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20me-FF5E5B?logo=ko-fi&logoColor=white&style=for-the-badge)](https://ko-fi.com/bornste)
 
 > [!WARNING]
 > In development – not yet ready for use.
@@ -24,7 +25,7 @@ A stopwatch integration for [Home Assistant](https://www.home-assistant.io/) tha
 ## Planned features
 
 - Any number of stopwatches, each set up as its own device (e.g. "Gaming", "Work time", "TV on").
-- Actions `stopwatch_plus.start` (also resumes), `stopwatch_plus.pause`, `stopwatch_plus.reset` and `stopwatch_plus.toggle`, plus buttons for each stopwatch.
+- Actions `stopwatch_plus.start` (also resumes), `stopwatch_plus.pause`, `stopwatch_plus.reset` and `stopwatch_plus.toggle`, plus buttons for each stopwatch (Start, Pause, Reset and a combined Start/Pause).
 - A duration sensor with the elapsed time, and a status sensor (`idle`, `running`, `paused`).
 - Optional binding to a source entity: the stopwatch runs while that entity is in one of the chosen states (e.g. `media_player.xbox` is `playing`) and pauses otherwise.
 - Interval events based on running time only (pauses do not count), available as a device trigger in the automation editor – for example to announce "You have been playing for 60 minutes".
@@ -46,7 +47,10 @@ A stopwatch is always in one of three states: `idle` (at zero), `running` or `pa
 
 Commands without effect, such as pausing a stopwatch that is not running, do nothing and fire no event. Only running time counts: pauses are not added to the elapsed time, and interval events fire after every full interval of running time.
 
-In the automation editor, every event type is also available as a **device trigger** of the stopwatch: add a trigger *Device*, choose the stopwatch (e.g. "Gaming") and pick *Stopwatch started*, *Interval reached* and so on – nothing has to be typed. The device trigger provides the same values as the event in `trigger.event.data`, e.g. `{{ trigger.event.data.elapsed_formatted }}`.
+In the automation editor, the events can be used without typing anything, in two ways:
+
+- **Event received** (entity-based trigger): every stopwatch has an event entity, e.g. `event.gaming_events`. Add a trigger, choose the stopwatch as target and pick *Event received* with the event types you need. The values are in `trigger.to_state.attributes`, e.g. `{{ trigger.to_state.attributes.elapsed_formatted }}`. The events also show up in the logbook and history of that entity.
+- **Device trigger** (classic): add a trigger *Device*, choose the stopwatch and pick *Stopwatch started*, *Interval reached* and so on. The values are in `trigger.event.data`, e.g. `{{ trigger.event.data.elapsed_formatted }}`.
 
 ### Following a source entity
 
@@ -128,6 +132,12 @@ actions:
 ## Development
 
 See [docs/development.md](docs/development.md) for the local development instance.
+
+## Support
+
+If Stopwatch Plus is useful to you, you can buy me a coffee on Ko-fi. Thank you!
+
+[![Support me on Ko-fi](https://img.shields.io/badge/Buy%20me%20a%20coffee-Ko--fi-FF5E5B?logo=ko-fi&logoColor=white&style=for-the-badge)](https://ko-fi.com/bornste)
 
 ## License
 
