@@ -296,16 +296,6 @@ const CARD_STYLES = `
     overflow: hidden;
     text-overflow: ellipsis;
   }
-  .status {
-    flex: none;
-    padding: 2px 10px;
-    border-radius: 12px;
-    font-size: 12px;
-    font-weight: 500;
-    line-height: 20px;
-    color: var(--state-color);
-    background: color-mix(in srgb, var(--state-color) 15%, transparent);
-  }
   .time {
     font-variant-numeric: tabular-nums;
     font-weight: 500;
@@ -389,11 +379,6 @@ const CARD_STYLES = `
     color: var(--warning-color);
   }
   /* Narrow cards, e.g. half of a section in a dashboard with several columns */
-  @container (max-width: 170px) {
-    .standard .status {
-      display: none;
-    }
-  }
   @container (max-width: 240px) {
     .controls {
       gap: 8px;
@@ -555,9 +540,8 @@ class StopwatchPlusCard extends LiveTimeElement {
         <div class="icon"><ha-icon icon="mdi:timer-outline"></ha-icon></div>
         <div class="info">
           <div class="name"></div>
-          ${compact ? '<div class="secondary"></div>' : ""}
+          <div class="secondary"></div>
         </div>
-        ${compact ? "" : '<div class="status"></div>'}
       </div>`;
     const body = compact
       ? `<div class="row">${header}<div class="time"></div><div class="controls"></div></div>`
@@ -575,7 +559,6 @@ class StopwatchPlusCard extends LiveTimeElement {
       header: root.querySelector(".header"),
       name: root.querySelector(".name"),
       secondary: root.querySelector(".secondary"),
-      status: root.querySelector(".status"),
       time: root.querySelector(".time"),
       controls: root.querySelector(".controls"),
       last: root.querySelector(".last"),
@@ -634,8 +617,9 @@ class StopwatchPlusCard extends LiveTimeElement {
       setText(elements.secondary, parts.join(" · "));
       elements.secondary.hidden = parts.length === 0;
     } else {
-      setText(elements.status, statusLabel(hass, stateObj));
-      elements.status.hidden = Boolean(config.hide_status);
+      // The status goes below the name, so the name keeps its full width
+      setText(elements.secondary, statusLabel(hass, stateObj));
+      elements.secondary.hidden = Boolean(config.hide_status);
       setText(elements.last, lastText);
       elements.last.hidden = Boolean(config.hide_last_session) || !lastText;
     }

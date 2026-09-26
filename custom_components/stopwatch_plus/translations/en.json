@@ -3,21 +3,21 @@
     "step": {
       "user": {
         "title": "Create a stopwatch",
-        "description": "Create a new stopwatch, for example for gaming or work time.",
+        "description": "Create a new stopwatch, for example for screen time or working time.",
         "data": {
           "name": "Name",
           "interval": "Interval",
           "update_interval": "Sensor update interval"
         },
         "data_description": {
-          "name": "Used for the device and its entities, e.g. \"Gaming\".",
+          "name": "Used for the device and its entities, e.g. \"Screen time\".",
           "interval": "Fire an interval event every time this much running time has passed. 0 turns it off. At most 24 hours.",
           "update_interval": "How often the elapsed time sensor is updated while running, between 1 second and 1 hour. Shorter intervals write more data to the database."
         },
         "sections": {
           "source": {
             "name": "Source entity",
-            "description": "Optional: let the stopwatch follow an entity, e.g. a game console. It runs while the entity is in one of the running states and pauses otherwise.",
+            "description": "Optional: let the stopwatch follow an entity, e.g. a TV or a window sensor. It runs while the entity is in one of the running states and pauses otherwise.",
             "data": {
               "source_entity": "Source entity",
               "running_states": "Running states",
@@ -59,7 +59,7 @@
         "sections": {
           "source": {
             "name": "Source entity",
-            "description": "Optional: let the stopwatch follow an entity, e.g. a game console. It runs while the entity is in one of the running states and pauses otherwise.",
+            "description": "Optional: let the stopwatch follow an entity, e.g. a TV or a window sensor. It runs while the entity is in one of the running states and pauses otherwise.",
             "data": {
               "source_entity": "Source entity",
               "running_states": "Running states",

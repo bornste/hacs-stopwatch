@@ -1,4 +1,4 @@
-"""Binding of a stopwatch to a source entity (e.g. a game console)."""
+"""Binding of a stopwatch to a source entity (e.g. a TV or a window sensor)."""
 
 from __future__ import annotations
 

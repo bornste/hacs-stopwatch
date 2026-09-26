@@ -3,21 +3,21 @@
     "step": {
       "user": {
         "title": "Stoppuhr erstellen",
-        "description": "Erstelle eine neue Stoppuhr, zum Beispiel fürs Gaming oder für die Arbeitszeit.",
+        "description": "Erstelle eine neue Stoppuhr, zum Beispiel für die Bildschirmzeit oder die Arbeitszeit.",
         "data": {
           "name": "Name",
           "interval": "Intervall",
           "update_interval": "Aktualisierungsintervall des Sensors"
         },
         "data_description": {
-          "name": "Wird für das Gerät und seine Entitäten verwendet, z. B. „Gaming“.",
+          "name": "Wird für das Gerät und seine Entitäten verwendet, z. B. „Bildschirmzeit“.",
           "interval": "Jedes Mal, wenn so viel Laufzeit vergangen ist, wird ein Intervall-Ereignis ausgelöst. 0 schaltet es aus. Höchstens 24 Stunden.",
           "update_interval": "Wie oft der Laufzeit-Sensor aktualisiert wird, während die Stoppuhr läuft, zwischen 1 Sekunde und 1 Stunde. Kürzere Intervalle schreiben mehr Daten in die Datenbank."
         },
         "sections": {
           "source": {
             "name": "Quell-Entität",
-            "description": "Optional: Die Stoppuhr folgt einer Entität, z. B. einer Spielkonsole. Sie läuft, solange die Entität in einem der Lauf-Zustände ist, und pausiert sonst.",
+            "description": "Optional: Die Stoppuhr folgt einer Entität, z. B. einem Fernseher oder einem Fenstersensor. Sie läuft, solange die Entität in einem der Lauf-Zustände ist, und pausiert sonst.",
             "data": {
               "source_entity": "Quell-Entität",
               "running_states": "Lauf-Zustände",
@@ -59,7 +59,7 @@
         "sections": {
           "source": {
             "name": "Quell-Entität",
-            "description": "Optional: Die Stoppuhr folgt einer Entität, z. B. einer Spielkonsole. Sie läuft, solange die Entität in einem der Lauf-Zustände ist, und pausiert sonst.",
+            "description": "Optional: Die Stoppuhr folgt einer Entität, z. B. einem Fernseher oder einem Fenstersensor. Sie läuft, solange die Entität in einem der Lauf-Zustände ist, und pausiert sonst.",
             "data": {
               "source_entity": "Quell-Entität",
               "running_states": "Lauf-Zustände",

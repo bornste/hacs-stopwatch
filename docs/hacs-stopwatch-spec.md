@@ -13,7 +13,7 @@ Last updated: 2026-09-26. Repository: https://github.com/bornste/hacs-stopwatch 
 | Integration type | `service` – stopwatches are listed under Settings → Devices & services → Integrations, one device per stopwatch; not a helper, so they do not fill up the helper list |
 | Live display | Attributes allow client-side counting; a dashboard card and a tile card feature bundled with the integration (see below) |
 | Home Assistant restart | State is restored; if the stopwatch was running, the downtime is counted |
-| Source entity | Optional: an entity plus the states that count as "running" (e.g. `media_player.xbox` = `playing`) → start/resume and pause automatically |
+| Source entity | Optional: an entity plus the states that count as "running" (e.g. `media_player.living_room_tv` = `playing`) → start/resume and pause automatically |
 | Auto-stop | Optional (on/off) with a configurable inactivity delay (see below) |
 | Unavailable source | Grace period before the stopwatch reacts (see below) |
 | Interval events | Configurable interval of running time (pauses do not count), with second precision |
@@ -26,7 +26,7 @@ Last updated: 2026-09-26. Repository: https://github.com/bornste/hacs-stopwatch 
 
 ## Multiple stopwatches
 
-Each stopwatch is its own config entry (Settings → Devices & services → Add integration → Stopwatch Plus), e.g. "Gaming", "Work time". Each entry creates a device with its own entities. Actions select the stopwatch via `target` (entity or device), for example:
+Each stopwatch is its own config entry (Settings → Devices & services → Add integration → Stopwatch Plus), e.g. "Screen time", "Work time". Each entry creates a device with its own entities. Actions select the stopwatch via `target` (entity or device), for example:
 
 ```yaml
 action: stopwatch_plus.start
@@ -71,7 +71,7 @@ Commands without effect (starting a running stopwatch, pausing a stopwatch that 
 
 ### Unavailable / unknown source
 
-Some sources (e.g. Xbox) briefly report `unavailable` or `unknown` while still in use.
+Some sources (e.g. TVs or game consoles) briefly report `unavailable` or `unknown` while still in use.
 
 - On `unavailable` / `unknown` the stopwatch keeps its current status and remembers the moment.
 - If the source returns to a "running" state within the grace period → nothing happened, the time keeps counting without a gap.
@@ -131,7 +131,7 @@ Same principle as the core `timer`: the state changes rarely and the frontend do
 - One file, `custom_components/stopwatch_plus/www/stopwatch-plus-card.js`, plain JavaScript (web components, no build step, no dependencies besides the elements of the Home Assistant frontend such as `ha-card` and `ha-icon`).
 - The integration serves the folder under `/stopwatch_plus_frontend/` and adds the file with `frontend.add_extra_js_url` (URL with `?v=<version>` so browsers load a new version). `frontend` and `http` are `after_dependencies`; without them (tests, minimal setups) nothing is registered.
 - The elements are defined only after the frontend has started (`home-assistant` defined): the frontend replaces `window.customElements` with a scoped registry polyfill, and elements defined earlier would not be found ("Custom element doesn't exist").
-- Card `custom:stopwatch-plus-card`: options `entity` (any entity of a stopwatch; the elapsed time and last session sensors are found via the device and the translation keys `elapsed` / `last_session`), `name`, `layout` (`standard` / `compact`), `buttons` (subset of `toggle`, `stop`, `reset`; default: all three in the standard layout, `toggle` and `stop` in the compact one), `hide_status`, `hide_last_session`. The time shrinks with the card width (container query units) and a bit more from one day on; container queries leave out the status badge (below 170 px), the icon (standard below 150 px, compact below 340 px) and the secondary line of the compact layout on narrow cards. The tile feature keeps the time fully visible and narrows the buttons instead. Visual editor via `getConfigForm`, card picker entry, stub config with the first stopwatch, and `getEntitySuggestion` for the "By entity" suggestions (standard, compact, tile card with the feature and `hide_state`). Buttons call the actions `stopwatch_plus.toggle`, `stop` and `reset`; Stop and Reset are disabled while idle.
+- Card `custom:stopwatch-plus-card`: options `entity` (any entity of a stopwatch; the elapsed time and last session sensors are found via the device and the translation keys `elapsed` / `last_session`), `name`, `layout` (`standard` / `compact`), `buttons` (subset of `toggle`, `stop`, `reset`; default: all three in the standard layout, `toggle` and `stop` in the compact one), `hide_status`, `hide_last_session`. The time shrinks with the card width (container query units) and a bit more from one day on; the status is shown below the name (no badge), so the name keeps its width; container queries leave out the icon (standard below 150 px, compact below 340 px) and the secondary line of the compact layout on narrow cards. The tile feature keeps the time fully visible and narrows the buttons instead. Visual editor via `getConfigForm`, card picker entry, stub config with the first stopwatch, and `getEntitySuggestion` for the "By entity" suggestions (standard, compact, tile card with the feature and `hide_state`). Buttons call the actions `stopwatch_plus.toggle`, `stop` and `reset`; Stop and Reset are disabled while idle.
 - Tile card feature `custom:stopwatch-plus-controls` for any stopwatch entity: options `hide_time` and `buttons` (subset of `toggle`, `stop`, `reset`).
 - Texts in English and German (from the user language), statuses via the entity translations.
 
