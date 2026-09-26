@@ -1,4 +1,4 @@
-<p align="center">
+<p align="left">
   <picture>
     <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/bornste/hacs-stopwatch/main/custom_components/stopwatch_plus/brand/dark_logo@2x.png">
     <img alt="Stopwatch Plus" src="https://raw.githubusercontent.com/bornste/hacs-stopwatch/main/custom_components/stopwatch_plus/brand/logo@2x.png" width="420">
@@ -7,7 +7,7 @@
 
 # Stopwatch Plus for Home Assistant
 
-The stopwatch with the plus – in case Home Assistant adds its own one day.
+***The stopwatch with the plus – in case Home Assistant adds its own one day.***<br><br>
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/bornste/hacs-stopwatch/tests.yml?branch=main&label=Tests&logo=github&style=flat-square)](https://github.com/bornste/hacs-stopwatch/actions/workflows/tests.yml)
 [![Validate](https://img.shields.io/github/actions/workflow/status/bornste/hacs-stopwatch/validate.yml?branch=main&label=Validate&logo=github&style=flat-square)](https://github.com/bornste/hacs-stopwatch/actions/workflows/validate.yml)
