@@ -18,6 +18,8 @@ const DOMAIN = "stopwatch_plus";
 const CARD_TYPE = "stopwatch-plus-card";
 const FEATURE_TYPE = "stopwatch-plus-controls";
 const BUTTONS = ["toggle", "stop", "reset"];
+// Buttons of the card when the configuration does not list any
+const DEFAULT_BUTTONS = { standard: BUTTONS, compact: ["toggle", "stop"] };
 
 const STRINGS = {
   en: {
@@ -30,7 +32,6 @@ const STRINGS = {
     layoutStandard: "Standard",
     layoutCompact: "Compact",
     hideStatus: "Hide status",
-    hideControls: "Hide controls",
     hideLastSession: "Hide last session",
     hideTime: "Hide time",
     buttons: "Buttons",
@@ -56,7 +57,6 @@ const STRINGS = {
     layoutStandard: "Standard",
     layoutCompact: "Kompakt",
     hideStatus: "Status ausblenden",
-    hideControls: "Bedienelemente ausblenden",
     hideLastSession: "Letzte Session ausblenden",
     hideTime: "Zeit ausblenden",
     buttons: "Buttons",
@@ -248,6 +248,8 @@ class LiveTimeElement extends HTMLElement {
 
 const CARD_STYLES = `
   ha-card {
+    container-type: inline-size;
+    overflow: hidden;
     height: 100%;
     box-sizing: border-box;
     padding: 16px;
@@ -312,8 +314,12 @@ const CARD_STYLES = `
   }
   .standard .time {
     text-align: center;
-    font-size: 48px;
+    /* Shrinks on narrow cards, and further from one day on (d.HH:MM:SS) */
+    font-size: min(48px, 24cqi);
     line-height: 56px;
+  }
+  .standard .time.long {
+    font-size: min(48px, 19cqi);
   }
   .compact .time {
     flex: none;
@@ -326,6 +332,8 @@ const CARD_STYLES = `
   }
   .control {
     flex: 1;
+    min-width: 0;
+    padding: 0;
     height: 42px;
     border: none;
     border-radius: 12px;
@@ -351,6 +359,9 @@ const CARD_STYLES = `
     cursor: default;
     opacity: 0.4;
   }
+  .compact .controls {
+    gap: 8px;
+  }
   .compact .control {
     flex: none;
     width: 40px;
@@ -372,9 +383,59 @@ const CARD_STYLES = `
   }
   .row .header {
     flex: 1;
+    min-width: 48px;
   }
   .warning {
     color: var(--warning-color);
+  }
+  /* Narrow cards, e.g. half of a section in a dashboard with several columns */
+  @container (max-width: 240px) {
+    .standard .status {
+      display: none;
+    }
+    .controls {
+      gap: 8px;
+    }
+    .compact .secondary {
+      display: none;
+    }
+    .compact {
+      padding: 8px;
+    }
+    /* The name gives way first, the time and the buttons stay usable */
+    .row .header {
+      min-width: 0;
+    }
+    .compact .time {
+      font-size: 14px;
+    }
+    .compact .control {
+      width: 32px;
+      height: 32px;
+    }
+  }
+  @container (max-width: 150px) {
+    .standard .icon {
+      display: none;
+    }
+  }
+  @container (max-width: 340px) {
+    .compact .icon {
+      display: none;
+    }
+    .compact .time {
+      font-size: 16px;
+    }
+    .compact .controls {
+      gap: 4px;
+    }
+    .compact .control {
+      width: 36px;
+      height: 36px;
+    }
+    .row {
+      gap: 8px;
+    }
   }
   [hidden] {
     display: none !important;
@@ -393,7 +454,7 @@ class StopwatchPlusCard extends LiveTimeElement {
     const entry = Object.values(hass?.entities || {}).find(
       (entity) => entity.platform === DOMAIN && entity.translation_key === "elapsed"
     );
-    return { entity: entry?.entity_id || "", layout: "standard" };
+    return { entity: entry?.entity_id || "", layout: "standard", buttons: [...BUTTONS] };
   }
 
   static getConfigForm() {
@@ -418,11 +479,20 @@ class StopwatchPlusCard extends LiveTimeElement {
           },
         },
         {
+          name: "buttons",
+          selector: {
+            select: {
+              multiple: true,
+              mode: "list",
+              options: BUTTONS.map((button) => ({ value: button, label: localize(undefined, button) })),
+            },
+          },
+        },
+        {
           type: "grid",
           name: "",
           schema: [
             { name: "hide_status", selector: { boolean: {} } },
-            { name: "hide_controls", selector: { boolean: {} } },
             { name: "hide_last_session", selector: { boolean: {} } },
           ],
         },
@@ -433,7 +503,7 @@ class StopwatchPlusCard extends LiveTimeElement {
           name: localize(undefined, "name"),
           layout: localize(undefined, "layout"),
           hide_status: localize(undefined, "hideStatus"),
-          hide_controls: localize(undefined, "hideControls"),
+          buttons: localize(undefined, "buttons"),
           hide_last_session: localize(undefined, "hideLastSession"),
         })[schema.name],
     };
@@ -548,36 +618,42 @@ class StopwatchPlusCard extends LiveTimeElement {
         ? `${localize(hass, "lastSession")}: ${formatDuration(lastSeconds)}`
         : "";
 
+    // Configured buttons in a fixed order, or the default of the layout
+    const buttons = Array.isArray(config.buttons)
+      ? BUTTONS.filter((button) => config.buttons.includes(button))
+      : DEFAULT_BUTTONS[compact ? "compact" : "standard"];
+    renderButtons(elements.controls, hass, buttons, this._stopwatch.elapsed, status, "control");
+    elements.controls.hidden = buttons.length === 0;
+
     if (compact) {
       const parts = [];
       if (!config.hide_status) parts.push(statusLabel(hass, stateObj));
       if (!config.hide_last_session && lastText) parts.push(lastText);
       setText(elements.secondary, parts.join(" · "));
       elements.secondary.hidden = parts.length === 0;
-      const buttons = config.hide_controls ? [] : ["toggle"];
-      renderButtons(elements.controls, hass, buttons, this._stopwatch.elapsed, status, "control");
     } else {
       setText(elements.status, statusLabel(hass, stateObj));
       elements.status.hidden = Boolean(config.hide_status);
-      renderButtons(elements.controls, hass, BUTTONS, this._stopwatch.elapsed, status, "control");
-      elements.controls.hidden = Boolean(config.hide_controls);
       setText(elements.last, lastText);
       elements.last.hidden = Boolean(config.hide_last_session) || !lastText;
     }
-    elements.controls.hidden = Boolean(config.hide_controls);
     this._tick();
     this._updateTicker();
   }
 
   _tick() {
     const stateObj = this._elapsedState();
-    if (stateObj && this._elements) setText(this._elements.time, formatDuration(liveSeconds(stateObj)));
+    if (!stateObj || !this._elements) return;
+    const text = formatDuration(liveSeconds(stateObj));
+    setText(this._elements.time, text);
+    this._elements.time.classList.toggle("long", text.length > 8);
   }
 }
 
 const FEATURE_STYLES = `
   :host {
     display: block;
+    container-type: inline-size;
   }
   .container {
     display: flex;
@@ -585,11 +661,14 @@ const FEATURE_STYLES = `
     height: var(--feature-height, 42px);
   }
   .time {
-    flex: 1;
+    flex: 1.5 1 auto;
     display: flex;
     align-items: center;
     justify-content: center;
-    min-width: 0;
+    /* The time is never cut off; the buttons get narrower instead */
+    min-width: max-content;
+    padding: 0 12px;
+    white-space: nowrap;
     border-radius: var(--feature-border-radius, 12px);
     font-variant-numeric: tabular-nums;
     font-weight: 500;
@@ -616,6 +695,24 @@ const FEATURE_STYLES = `
   .button:disabled {
     cursor: default;
     opacity: 0.4;
+  }
+  @container (max-width: 280px) {
+    .container {
+      gap: 6px;
+    }
+    .time {
+      padding: 0 8px;
+      font-size: 14px;
+    }
+  }
+  @container (max-width: 200px) {
+    .time {
+      padding: 0 6px;
+      font-size: 12px;
+    }
+    .button {
+      min-width: 28px;
+    }
   }
   [hidden] {
     display: none !important;
@@ -720,6 +817,42 @@ class StopwatchPlusControls extends LiveTimeElement {
 }
 
 /**
+ * Suggest the card for a stopwatch entity in the card picker ("By entity").
+ *
+ * Offered for every entity of a stopwatch; the cards use its elapsed time sensor.
+ * The card picker shows them below "Community" as "Stopwatch Plus - <label>".
+ */
+function entitySuggestions(hass, entityId) {
+  if (!isStopwatchEntity(hass, entityId)) return null;
+  const entity = resolveStopwatch(hass, entityId).elapsed || entityId;
+  return [
+    {
+      label: localize(hass, "layoutStandard"),
+      config: { type: `custom:${CARD_TYPE}`, entity, layout: "standard", buttons: [...BUTTONS] },
+    },
+    {
+      label: localize(hass, "layoutCompact"),
+      config: {
+        type: `custom:${CARD_TYPE}`,
+        entity,
+        layout: "compact",
+        buttons: [...DEFAULT_BUTTONS.compact],
+      },
+    },
+    {
+      label: localize(hass, "featureName"),
+      // The feature shows the live time, so the (less often updated) state is hidden
+      config: {
+        type: "tile",
+        entity,
+        hide_state: true,
+        features: [{ type: `custom:${FEATURE_TYPE}` }],
+      },
+    },
+  ];
+}
+
+/**
  * Wait until the Home Assistant frontend has started.
  *
  * The frontend replaces window.customElements with a scoped registry polyfill when
@@ -748,6 +881,7 @@ whenFrontendReady().then(() => {
       description: localize(undefined, "cardDescription"),
       preview: true,
       documentationURL: "https://github.com/bornste/hacs-stopwatch",
+      getEntitySuggestion: entitySuggestions,
     });
   }
   

@@ -126,20 +126,22 @@ Go to **Settings → Devices & services → Add integration**, search for **Stop
 
 Stopwatch Plus brings its own dashboard card. It is loaded automatically – no resource has to be added. It counts live in the browser every second, whatever the sensor update interval, and has buttons for Start/Pause, Stop and Reset.
 
-In the dashboard editor, choose **Add card → Stopwatch Plus** and select a stopwatch. Everything can be set in the visual editor; in YAML:
+In the dashboard editor, choose **Add card** and either pick a stopwatch entity under **By entity** – the suggestions offer the card in both layouts and a tile card with the controls – or choose **By card → Stopwatch Plus** and select a stopwatch. Everything can be set in the visual editor; in YAML:
 
 ```yaml
 type: custom:stopwatch-plus-card
 entity: sensor.gaming_elapsed_time  # any entity of the stopwatch
 name: Gaming                        # optional, default: the name of the stopwatch
 layout: standard                    # standard (default) or compact
+buttons: [toggle, stop, reset]      # any of them; [] for none
 hide_status: false
-hide_controls: false
 hide_last_session: false
 ```
 
 - **Standard:** name and status, the running time in large digits, the buttons and the last session.
-- **Compact:** one row with name, status, time and a Start/Pause button – e.g. for a list of stopwatches.
+- **Compact:** one row with name, status, time and the buttons – e.g. for a list of stopwatches.
+- **Buttons:** without `buttons`, the standard layout shows Start/Pause, Stop and Reset, the compact layout Start/Pause and Stop. Stop and Reset are greyed out while the stopwatch is idle.
+- **Narrow cards:** the card adapts to its width – the time gets smaller, and on very narrow cards the status badge and the icon are left out. The compact layout needs about half a section; for narrower cards, the standard layout works better.
 
 **Tile card feature:** a [tile card](https://www.home-assistant.io/dashboards/tile/) of any stopwatch entity can show the live time and the buttons as a feature. In the tile card editor, choose **Features → Add feature → Stopwatch Plus controls**; in YAML:
 

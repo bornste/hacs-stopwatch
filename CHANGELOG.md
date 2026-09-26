@@ -6,8 +6,9 @@ All notable changes to Stopwatch Plus are documented here. The format follows [K
 
 ### Added
 
-- Dashboard card *Stopwatch Plus* (`custom:stopwatch-plus-card`), shipped with the integration and loaded automatically: counts live in the browser every second, independent of the sensor update interval, with buttons for Start/Pause, Stop and Reset, the status and the last session. Layouts *standard* and *compact*, visual editor, English and German.
+- Dashboard card *Stopwatch Plus* (`custom:stopwatch-plus-card`), shipped with the integration and loaded automatically: counts live in the browser every second, independent of the sensor update interval, with buttons for Start/Pause, Stop and Reset (selectable), the status and the last session. Layouts *standard* and *compact*, visual editor, English and German.
 - Tile card feature *Stopwatch Plus controls* (`custom:stopwatch-plus-controls`): live time and buttons below a tile card of a stopwatch entity.
+- Card suggestions: when adding a card *By entity* and picking a stopwatch entity, the card picker offers the card (standard and compact) and a tile card with the controls.
 
 ## [0.3.0] - 2026-09-25
 
