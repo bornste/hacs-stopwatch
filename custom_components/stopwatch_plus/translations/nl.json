@@ -1,0 +1,229 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Stopwatch maken",
+        "description": "Maak een nieuwe stopwatch, bijvoorbeeld voor schermtijd of werktijd.",
+        "data": {
+          "name": "Naam",
+          "interval": "Interval",
+          "update_interval": "Update-interval van de sensor"
+        },
+        "data_description": {
+          "name": "Wordt gebruikt voor het apparaat en de entiteiten ervan, bijv. \"Schermtijd\".",
+          "interval": "Activeer een intervalgebeurtenis telkens wanneer zoveel looptijd is verstreken. 0 schakelt dit uit. Maximaal 24 uur.",
+          "update_interval": "Hoe vaak de sensor voor de verstreken tijd wordt bijgewerkt terwijl de stopwatch loopt, tussen 1 seconde en 1 uur. Kortere intervallen schrijven meer gegevens naar de database."
+        },
+        "sections": {
+          "source": {
+            "name": "Bronentiteit",
+            "description": "Optioneel: laat de stopwatch een entiteit volgen, bijv. een tv of een raamsensor. Hij loopt zolang de entiteit in een van de looptoestanden is en pauzeert anders.",
+            "data": {
+              "source_entity": "Bronentiteit",
+              "running_states": "Looptoestanden",
+              "grace_period": "Wachttijd bij onbeschikbaarheid",
+              "auto_stop": "Automatisch stoppen na inactiviteit",
+              "auto_stop_delay": "Inactiviteit tot het stoppen"
+            },
+            "data_description": {
+              "source_entity": "Laat leeg om de stopwatch alleen met knoppen, acties en automatiseringen te bedienen.",
+              "running_states": "Toestanden van de bronentiteit waarin de stopwatch loopt, bijv. \"playing\" of \"on\". Je kunt ook eigen waarden typen.",
+              "grace_period": "Als de bron langer dan deze tijd onbeschikbaar of onbekend is, pauzeert de stopwatch met terugwerkende kracht vanaf het begin van de uitval. 0 schakelt de wachttijd uit: onbeschikbaar pauzeert dan meteen, zoals elke andere toestand die niet als lopend geldt. Maximaal 1 uur.",
+              "auto_stop": "Als de bron gedurende de onderstaande tijd inactief blijft, eindigt de sessie: de stopwatch wordt gestopt en teruggezet op nul. De tijd van de sessie blijft bewaard in de sensor \"Laatste sessie\". De volgende start van de bron begint een nieuwe sessie.",
+              "auto_stop_delay": "Hoe lang de bron inactief moet zijn voordat de stopwatch stopt, maximaal 7 dagen. 0: de stopwatch stopt zodra de bron inactief wordt."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "interval_too_long": "Het interval mag maximaal 24 uur zijn.",
+      "update_interval_out_of_range": "Het update-interval moet tussen 1 seconde en 1 uur liggen.",
+      "running_states_required": "Selecteer ten minste één looptoestand voor de bronentiteit.",
+      "grace_period_too_long": "De wachttijd mag maximaal 1 uur zijn.",
+      "auto_stop_delay_too_long": "De inactiviteit tot het stoppen mag maximaal 7 dagen zijn."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opties van de stopwatch",
+        "data": {
+          "interval": "Interval",
+          "update_interval": "Update-interval van de sensor"
+        },
+        "data_description": {
+          "interval": "Activeer een intervalgebeurtenis telkens wanneer zoveel looptijd is verstreken. 0 schakelt dit uit. Maximaal 24 uur.",
+          "update_interval": "Hoe vaak de sensor voor de verstreken tijd wordt bijgewerkt terwijl de stopwatch loopt, tussen 1 seconde en 1 uur. Kortere intervallen schrijven meer gegevens naar de database."
+        },
+        "sections": {
+          "source": {
+            "name": "Bronentiteit",
+            "description": "Optioneel: laat de stopwatch een entiteit volgen, bijv. een tv of een raamsensor. Hij loopt zolang de entiteit in een van de looptoestanden is en pauzeert anders.",
+            "data": {
+              "source_entity": "Bronentiteit",
+              "running_states": "Looptoestanden",
+              "grace_period": "Wachttijd bij onbeschikbaarheid",
+              "auto_stop": "Automatisch stoppen na inactiviteit",
+              "auto_stop_delay": "Inactiviteit tot het stoppen"
+            },
+            "data_description": {
+              "source_entity": "Laat leeg om de stopwatch alleen met knoppen, acties en automatiseringen te bedienen.",
+              "running_states": "Toestanden van de bronentiteit waarin de stopwatch loopt, bijv. \"playing\" of \"on\". Je kunt ook eigen waarden typen.",
+              "grace_period": "Als de bron langer dan deze tijd onbeschikbaar of onbekend is, pauzeert de stopwatch met terugwerkende kracht vanaf het begin van de uitval. 0 schakelt de wachttijd uit: onbeschikbaar pauzeert dan meteen, zoals elke andere toestand die niet als lopend geldt. Maximaal 1 uur.",
+              "auto_stop": "Als de bron gedurende de onderstaande tijd inactief blijft, eindigt de sessie: de stopwatch wordt gestopt en teruggezet op nul. De tijd van de sessie blijft bewaard in de sensor \"Laatste sessie\". De volgende start van de bron begint een nieuwe sessie.",
+              "auto_stop_delay": "Hoe lang de bron inactief moet zijn voordat de stopwatch stopt, maximaal 7 dagen. 0: de stopwatch stopt zodra de bron inactief wordt."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "interval_too_long": "Het interval mag maximaal 24 uur zijn.",
+      "update_interval_out_of_range": "Het update-interval moet tussen 1 seconde en 1 uur liggen.",
+      "running_states_required": "Selecteer ten minste één looptoestand voor de bronentiteit.",
+      "grace_period_too_long": "De wachttijd mag maximaal 1 uur zijn.",
+      "auto_stop_delay_too_long": "De inactiviteit tot het stoppen mag maximaal 7 dagen zijn."
+    }
+  },
+  "entity": {
+    "button": {
+      "start": {
+        "name": "Start"
+      },
+      "pause": {
+        "name": "Pauze"
+      },
+      "stop": {
+        "name": "Stop"
+      },
+      "reset": {
+        "name": "Reset"
+      },
+      "toggle": {
+        "name": "Start/Pauze"
+      }
+    },
+    "sensor": {
+      "elapsed": {
+        "name": "Verstreken tijd",
+        "state_attributes": {
+          "elapsed_formatted": {
+            "name": "Verstreken tijd (opgemaakt)"
+          },
+          "status": {
+            "name": "Status",
+            "state": {
+              "idle": "Gereed",
+              "running": "Loopt",
+              "paused": "Gepauzeerd"
+            }
+          },
+          "started_at": {
+            "name": "Gestart om"
+          },
+          "running_since": {
+            "name": "Loopt sinds"
+          },
+          "accumulated_seconds": {
+            "name": "Opgetelde seconden"
+          },
+          "interval_count": {
+            "name": "Aantal intervallen"
+          }
+        }
+      },
+      "status": {
+        "name": "Status",
+        "state": {
+          "idle": "Gereed",
+          "running": "Loopt",
+          "paused": "Gepauzeerd"
+        }
+      },
+      "last_session": {
+        "name": "Laatste sessie",
+        "state_attributes": {
+          "elapsed_formatted": {
+            "name": "Laatste sessie (opgemaakt)"
+          },
+          "ended_at": {
+            "name": "Beëindigd om"
+          }
+        }
+      }
+    },
+    "event": {
+      "events": {
+        "name": "Gebeurtenissen",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "started": "Gestart",
+              "paused": "Gepauzeerd",
+              "resumed": "Hervat",
+              "stopped": "Gestopt",
+              "reset": "Gereset",
+              "interval": "Interval bereikt"
+            }
+          },
+          "elapsed_seconds": {
+            "name": "Verstreken seconden"
+          },
+          "elapsed_formatted": {
+            "name": "Verstreken tijd (opgemaakt)"
+          },
+          "interval_count": {
+            "name": "Aantal intervallen"
+          },
+          "source": {
+            "name": "Oorzaak",
+            "state": {
+              "action": "Actie",
+              "button": "Knop",
+              "source_entity": "Bronentiteit",
+              "auto_stop": "Automatisch stoppen"
+            }
+          }
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "no_stopwatch_targeted": {
+      "message": "Er is geen geladen stopwatch geselecteerd. Selecteer een entiteit of apparaat van Stopwatch Plus."
+    }
+  },
+  "services": {
+    "start": {
+      "name": "Starten",
+      "description": "Start de geselecteerde stopwatches, of hervat ze als ze gepauzeerd zijn."
+    },
+    "pause": {
+      "name": "Pauzeren",
+      "description": "Pauzeert de geselecteerde stopwatches."
+    },
+    "stop": {
+      "name": "Stoppen",
+      "description": "Stopt de geselecteerde stopwatches en zet ze terug op nul."
+    },
+    "reset": {
+      "name": "Resetten",
+      "description": "Zet de geselecteerde stopwatches terug op nul. Lopende stopwatches blijven lopen en tellen opnieuw vanaf nul, gepauzeerde worden gestopt."
+    },
+    "toggle": {
+      "name": "Omschakelen",
+      "description": "Pauzeert de geselecteerde stopwatches als ze lopen, en start ze anders."
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "started": "Stopwatch gestart",
+      "paused": "Stopwatch gepauzeerd",
+      "resumed": "Stopwatch hervat",
+      "stopped": "Stopwatch gestopt",
+      "reset": "Stopwatch gereset",
+      "interval": "Interval bereikt"
+    }
+  }
+}

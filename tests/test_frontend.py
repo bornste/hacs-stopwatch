@@ -32,6 +32,11 @@ async def test_card_is_served_and_loaded(
     body = await response.text()
     assert "customElements.define(CARD_TYPE, StopwatchPlusCard)" in body
 
+    # The card loads its texts from a second file next to it
+    response = await client.get(url.replace("card.js", "card-translations.js"))
+    assert response.status == 200
+    assert "export const STRINGS" in await response.text()
+
 
 async def test_no_card_without_frontend(hass: HomeAssistant) -> None:
     """Without the frontend (e.g. in a minimal setup), setup still works."""

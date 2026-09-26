@@ -133,7 +133,7 @@ Same principle as the core `timer`: the state changes rarely and the frontend do
 - The elements are defined only after the frontend has started (`home-assistant` defined): the frontend replaces `window.customElements` with a scoped registry polyfill, and elements defined earlier would not be found ("Custom element doesn't exist").
 - Card `custom:stopwatch-plus-card`: options `entity` (any entity of a stopwatch; the elapsed time and last session sensors are found via the device and the translation keys `elapsed` / `last_session`), `name`, `layout` (`standard` / `compact`), `buttons` (subset of `toggle`, `stop`, `reset`; default: all three in the standard layout, `toggle` and `stop` in the compact one), `hide_status`, `hide_last_session`. The time shrinks with the card width (container query units) and a bit more from one day on; the status is shown below the name (no badge), so the name keeps its width; container queries leave out the icon (standard below 150 px, compact below 340 px) and the secondary line of the compact layout on narrow cards. The tile feature keeps the time fully visible and narrows the buttons instead. Visual editor via `getConfigForm`, card picker entry, stub config with the first stopwatch, and `getEntitySuggestion` for the "By entity" suggestions (standard, compact, tile card with the feature and `hide_state`). Buttons call the actions `stopwatch_plus.toggle`, `stop` and `reset`; Stop and Reset are disabled while idle.
 - Tile card feature `custom:stopwatch-plus-controls` for any stopwatch entity: options `hide_time` and `buttons` (subset of `toggle`, `stop`, `reset`).
-- Texts in English and German (from the user language), statuses via the entity translations.
+- Texts in `www/stopwatch-plus-card-translations.js` (one block per language, loaded by the card with the same version parameter), chosen by the user language with English as fallback; statuses via the entity translations.
 
 ## Database note
 
@@ -146,7 +146,7 @@ custom_components/stopwatch_plus/
   __init__.py, manifest.json, const.py, config_flow.py,
   stopwatch.py (state logic), entity.py, sensor.py, button.py,
   services.py, services.yaml, device_trigger.py,
-  translations/en.json, translations/de.json,
+  translations/en.json, de, nl, fr, es, it,
   frontend.py, www/stopwatch-plus-card.js (dashboard card and tile feature)
 docs/hacs-stopwatch-spec.md, docs/development.md
 scripts/setup, scripts/develop (local development instance in WSL)
@@ -178,7 +178,9 @@ Icon and logo are shipped with the integration in `custom_components/stopwatch_p
 
 ## Translations
 
-Custom integrations read their texts from `translations/<language>.json`; `translations/en.json` is the source of truth. There is no `strings.json` (that file is only used by core integrations).
+Custom integrations read their texts from `translations/<language>.json`; `translations/en.json` is the source of truth. There is no `strings.json` (that file is only used by core integrations). The card has its own texts in `www/stopwatch-plus-card-translations.js`.
+
+Languages: English and German (written by hand), Dutch, French, Spanish and Italian (translated with AI, using Home Assistant's own terms in each language; marked in the README, corrections welcome). Every new or changed text is added to all six languages.
 
 ## Open points
 

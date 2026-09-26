@@ -48,7 +48,7 @@ Home Assistant's built-in `timer` counts down. Stopwatch Plus counts **up**: sta
 - **Last session** kept in its own sensor after the stopwatch went back to zero.
 - **Survives restarts** of Home Assistant; a running stopwatch keeps counting.
 - **Database-friendly:** the sensors update once a minute by default; the card counts every second anyway.
-- **English and German.** More languages are welcome, see [FAQ](#faq).
+- **Six languages:** English, German, Dutch, French, Spanish and Italian. Dutch, French, Spanish and Italian are translated with AI – corrections and more languages are welcome, see [FAQ](#faq).
 
 ## Use cases
 
@@ -294,8 +294,13 @@ Reload the dashboard once, or clear the browser cache.
 **Why do the sensors update only once a minute?**
 Every update is written to the database. With one update per second, a running stopwatch would write about 3600 rows per hour. The card and the events do not depend on it: the card counts in the browser, and interval events fire at the exact moment, whatever the update interval. Each interval event also updates the sensors, so a short interval adds database rows as well. The update interval can be changed via **Configure**.
 
-**Can I add a language?**
-Gladly: copy [`en.json`](custom_components/stopwatch_plus/translations/en.json), translate it, save it as `<language code>.json` (e.g. `fr.json`) and open a pull request.
+**Can I add a language or improve a translation?**
+Gladly. Dutch, French, Spanish and Italian are translated with AI and have not been checked by native speakers yet, so corrections are just as welcome as new languages. The texts are in two places:
+
+1. **Integration** (setup, entities, actions, triggers): copy [`translations/en.json`](custom_components/stopwatch_plus/translations/en.json) and save it as `<language code>.json`, e.g. `pt.json`.
+2. **Dashboard card:** in [`www/stopwatch-plus-card-translations.js`](custom_components/stopwatch_plus/www/stopwatch-plus-card-translations.js), copy the `en` block and rename it to the language code.
+
+Translate the texts, keep the keys as they are, and open a pull request.
 
 **Why is the domain `stopwatch_plus` and not `stopwatch`?**
 Every integration has a unique internal name, the *domain*. It appears in action names such as `stopwatch_plus.start` and cannot easily be changed later without breaking automations. If Home Assistant ever ships a built-in stopwatch, it would almost certainly use the domain `stopwatch`, and a custom integration with the same domain would override it. `stopwatch_plus` rules out that collision from the start – and the "plus" stands for the features beyond a plain stopwatch.

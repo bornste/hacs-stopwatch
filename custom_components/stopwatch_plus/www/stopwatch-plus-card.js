@@ -21,58 +21,9 @@ const BUTTONS = ["toggle", "stop", "reset"];
 // Buttons of the card when the configuration does not list any
 const DEFAULT_BUTTONS = { standard: BUTTONS, compact: ["toggle", "stop"] };
 
-const STRINGS = {
-  en: {
-    cardName: "Stopwatch Plus",
-    cardDescription: "Live running time of a stopwatch with its controls.",
-    featureName: "Stopwatch Plus controls",
-    entity: "Stopwatch",
-    name: "Name",
-    layout: "Layout",
-    layoutStandard: "Standard",
-    layoutCompact: "Compact",
-    hideStatus: "Hide status",
-    hideLastSession: "Hide last session",
-    hideTime: "Hide time",
-    buttons: "Buttons",
-    start: "Start",
-    resume: "Resume",
-    pause: "Pause",
-    stop: "Stop",
-    reset: "Reset",
-    toggle: "Start/Pause",
-    lastSession: "Last session",
-    idle: "Idle",
-    running: "Running",
-    paused: "Paused",
-    notFound: "Stopwatch not found",
-  },
-  de: {
-    cardName: "Stopwatch Plus",
-    cardDescription: "Laufende Zeit einer Stoppuhr mit ihren Bedienelementen.",
-    featureName: "Stopwatch Plus Bedienelemente",
-    entity: "Stoppuhr",
-    name: "Name",
-    layout: "Layout",
-    layoutStandard: "Standard",
-    layoutCompact: "Kompakt",
-    hideStatus: "Status ausblenden",
-    hideLastSession: "Letzte Session ausblenden",
-    hideTime: "Zeit ausblenden",
-    buttons: "Buttons",
-    start: "Starten",
-    resume: "Fortsetzen",
-    pause: "Pausieren",
-    stop: "Stoppen",
-    reset: "Zurücksetzen",
-    toggle: "Start/Pause",
-    lastSession: "Letzte Session",
-    idle: "Bereit",
-    running: "Läuft",
-    paused: "Pausiert",
-    notFound: "Stoppuhr nicht gefunden",
-  },
-};
+// Texts per language, loaded from stopwatch-plus-card-translations.js before the
+// elements are defined
+let STRINGS = { en: {} };
 
 /** Return the language of the user, falling back to the page language. */
 function language(hass) {
@@ -857,7 +808,18 @@ function whenFrontendReady() {
   ]);
 }
 
-whenFrontendReady().then(() => {
+/** Load the texts, with the same version parameter as this file (browser cache). */
+async function loadStrings() {
+  const url = new URL("./stopwatch-plus-card-translations.js", import.meta.url);
+  url.search = new URL(import.meta.url).search;
+  try {
+    STRINGS = (await import(url.href)).STRINGS;
+  } catch (error) {
+    console.error("Stopwatch Plus: could not load the card texts", error);
+  }
+}
+
+Promise.all([whenFrontendReady(), loadStrings()]).then(() => {
   if (!customElements.get(CARD_TYPE)) {
     customElements.define(CARD_TYPE, StopwatchPlusCard);
     window.customCards = window.customCards || [];

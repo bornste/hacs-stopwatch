@@ -1,0 +1,229 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Créer un chronomètre",
+        "description": "Créez un nouveau chronomètre, par exemple pour le temps d'écran ou le temps de travail.",
+        "data": {
+          "name": "Nom",
+          "interval": "Intervalle",
+          "update_interval": "Intervalle de mise à jour du capteur"
+        },
+        "data_description": {
+          "name": "Utilisé pour l'appareil et ses entités, par ex. « Temps d'écran ».",
+          "interval": "Déclenche un événement d'intervalle chaque fois que cette durée de fonctionnement est écoulée. 0 le désactive. 24 heures au maximum.",
+          "update_interval": "Fréquence de mise à jour du capteur de temps écoulé pendant le fonctionnement, entre 1 seconde et 1 heure. Des intervalles plus courts écrivent davantage de données dans la base de données."
+        },
+        "sections": {
+          "source": {
+            "name": "Entité source",
+            "description": "Facultatif : le chronomètre suit une entité, par ex. un téléviseur ou un capteur de fenêtre. Il tourne tant que l'entité est dans l'un des états de fonctionnement et se met en pause sinon.",
+            "data": {
+              "source_entity": "Entité source",
+              "running_states": "États de fonctionnement",
+              "grace_period": "Délai de grâce en cas d'indisponibilité",
+              "auto_stop": "Arrêter automatiquement après une inactivité",
+              "auto_stop_delay": "Inactivité avant l'arrêt"
+            },
+            "data_description": {
+              "source_entity": "Laissez vide pour commander le chronomètre uniquement avec les boutons, les actions et les automatisations.",
+              "running_states": "États de l'entité source dans lesquels le chronomètre tourne, par ex. « playing » ou « on ». Vous pouvez saisir vos propres valeurs.",
+              "grace_period": "Si la source est indisponible ou inconnue plus longtemps que cette durée, le chronomètre se met en pause, avec effet rétroactif au début de la coupure. 0 désactive le délai de grâce : l'indisponibilité met alors immédiatement en pause, comme tout autre état qui n'est pas un état de fonctionnement. 1 heure au maximum.",
+              "auto_stop": "Si la source reste inactive pendant le délai ci-dessous, la session se termine : le chronomètre est arrêté et remis à zéro. Le temps de la session reste disponible dans le capteur « Dernière session ». Le prochain démarrage de la source commence une nouvelle session.",
+              "auto_stop_delay": "Durée pendant laquelle la source doit être inactive avant l'arrêt du chronomètre, 7 jours au maximum. 0 : le chronomètre s'arrête dès que la source devient inactive."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "interval_too_long": "L'intervalle ne peut pas dépasser 24 heures.",
+      "update_interval_out_of_range": "L'intervalle de mise à jour doit être compris entre 1 seconde et 1 heure.",
+      "running_states_required": "Sélectionnez au moins un état de fonctionnement pour l'entité source.",
+      "grace_period_too_long": "Le délai de grâce ne peut pas dépasser 1 heure.",
+      "auto_stop_delay_too_long": "L'inactivité avant l'arrêt ne peut pas dépasser 7 jours."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Options du chronomètre",
+        "data": {
+          "interval": "Intervalle",
+          "update_interval": "Intervalle de mise à jour du capteur"
+        },
+        "data_description": {
+          "interval": "Déclenche un événement d'intervalle chaque fois que cette durée de fonctionnement est écoulée. 0 le désactive. 24 heures au maximum.",
+          "update_interval": "Fréquence de mise à jour du capteur de temps écoulé pendant le fonctionnement, entre 1 seconde et 1 heure. Des intervalles plus courts écrivent davantage de données dans la base de données."
+        },
+        "sections": {
+          "source": {
+            "name": "Entité source",
+            "description": "Facultatif : le chronomètre suit une entité, par ex. un téléviseur ou un capteur de fenêtre. Il tourne tant que l'entité est dans l'un des états de fonctionnement et se met en pause sinon.",
+            "data": {
+              "source_entity": "Entité source",
+              "running_states": "États de fonctionnement",
+              "grace_period": "Délai de grâce en cas d'indisponibilité",
+              "auto_stop": "Arrêter automatiquement après une inactivité",
+              "auto_stop_delay": "Inactivité avant l'arrêt"
+            },
+            "data_description": {
+              "source_entity": "Laissez vide pour commander le chronomètre uniquement avec les boutons, les actions et les automatisations.",
+              "running_states": "États de l'entité source dans lesquels le chronomètre tourne, par ex. « playing » ou « on ». Vous pouvez saisir vos propres valeurs.",
+              "grace_period": "Si la source est indisponible ou inconnue plus longtemps que cette durée, le chronomètre se met en pause, avec effet rétroactif au début de la coupure. 0 désactive le délai de grâce : l'indisponibilité met alors immédiatement en pause, comme tout autre état qui n'est pas un état de fonctionnement. 1 heure au maximum.",
+              "auto_stop": "Si la source reste inactive pendant le délai ci-dessous, la session se termine : le chronomètre est arrêté et remis à zéro. Le temps de la session reste disponible dans le capteur « Dernière session ». Le prochain démarrage de la source commence une nouvelle session.",
+              "auto_stop_delay": "Durée pendant laquelle la source doit être inactive avant l'arrêt du chronomètre, 7 jours au maximum. 0 : le chronomètre s'arrête dès que la source devient inactive."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "interval_too_long": "L'intervalle ne peut pas dépasser 24 heures.",
+      "update_interval_out_of_range": "L'intervalle de mise à jour doit être compris entre 1 seconde et 1 heure.",
+      "running_states_required": "Sélectionnez au moins un état de fonctionnement pour l'entité source.",
+      "grace_period_too_long": "Le délai de grâce ne peut pas dépasser 1 heure.",
+      "auto_stop_delay_too_long": "L'inactivité avant l'arrêt ne peut pas dépasser 7 jours."
+    }
+  },
+  "entity": {
+    "button": {
+      "start": {
+        "name": "Démarrer"
+      },
+      "pause": {
+        "name": "Pause"
+      },
+      "stop": {
+        "name": "Arrêter"
+      },
+      "reset": {
+        "name": "Réinitialiser"
+      },
+      "toggle": {
+        "name": "Démarrer/Pause"
+      }
+    },
+    "sensor": {
+      "elapsed": {
+        "name": "Temps écoulé",
+        "state_attributes": {
+          "elapsed_formatted": {
+            "name": "Temps écoulé (formaté)"
+          },
+          "status": {
+            "name": "État",
+            "state": {
+              "idle": "Prêt",
+              "running": "En cours",
+              "paused": "En pause"
+            }
+          },
+          "started_at": {
+            "name": "Démarré à"
+          },
+          "running_since": {
+            "name": "En cours depuis"
+          },
+          "accumulated_seconds": {
+            "name": "Secondes cumulées"
+          },
+          "interval_count": {
+            "name": "Nombre d'intervalles"
+          }
+        }
+      },
+      "status": {
+        "name": "État",
+        "state": {
+          "idle": "Prêt",
+          "running": "En cours",
+          "paused": "En pause"
+        }
+      },
+      "last_session": {
+        "name": "Dernière session",
+        "state_attributes": {
+          "elapsed_formatted": {
+            "name": "Dernière session (formatée)"
+          },
+          "ended_at": {
+            "name": "Terminée à"
+          }
+        }
+      }
+    },
+    "event": {
+      "events": {
+        "name": "Événements",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "started": "Démarré",
+              "paused": "En pause",
+              "resumed": "Repris",
+              "stopped": "Arrêté",
+              "reset": "Réinitialisé",
+              "interval": "Intervalle atteint"
+            }
+          },
+          "elapsed_seconds": {
+            "name": "Secondes écoulées"
+          },
+          "elapsed_formatted": {
+            "name": "Temps écoulé (formaté)"
+          },
+          "interval_count": {
+            "name": "Nombre d'intervalles"
+          },
+          "source": {
+            "name": "Origine",
+            "state": {
+              "action": "Action",
+              "button": "Bouton",
+              "source_entity": "Entité source",
+              "auto_stop": "Arrêt automatique"
+            }
+          }
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "no_stopwatch_targeted": {
+      "message": "Aucun chronomètre chargé n'a été ciblé. Sélectionnez une entité ou un appareil Stopwatch Plus."
+    }
+  },
+  "services": {
+    "start": {
+      "name": "Démarrer",
+      "description": "Démarre les chronomètres ciblés, ou les reprend s'ils sont en pause."
+    },
+    "pause": {
+      "name": "Mettre en pause",
+      "description": "Met en pause les chronomètres ciblés."
+    },
+    "stop": {
+      "name": "Arrêter",
+      "description": "Arrête les chronomètres ciblés et les remet à zéro."
+    },
+    "reset": {
+      "name": "Réinitialiser",
+      "description": "Remet les chronomètres ciblés à zéro. Les chronomètres en cours continuent de tourner à partir de zéro, ceux en pause sont arrêtés."
+    },
+    "toggle": {
+      "name": "Basculer",
+      "description": "Met en pause les chronomètres ciblés s'ils tournent, sinon les démarre."
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "started": "Chronomètre démarré",
+      "paused": "Chronomètre mis en pause",
+      "resumed": "Chronomètre repris",
+      "stopped": "Chronomètre arrêté",
+      "reset": "Chronomètre réinitialisé",
+      "interval": "Intervalle atteint"
+    }
+  }
+}

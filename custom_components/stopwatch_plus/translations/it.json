@@ -1,0 +1,229 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Crea un cronometro",
+        "description": "Crea un nuovo cronometro, ad esempio per il tempo davanti allo schermo o per l'orario di lavoro.",
+        "data": {
+          "name": "Nome",
+          "interval": "Intervallo",
+          "update_interval": "Intervallo di aggiornamento del sensore"
+        },
+        "data_description": {
+          "name": "Usato per il dispositivo e le sue entità, ad es. \"Tempo schermo\".",
+          "interval": "Genera un evento di intervallo ogni volta che è trascorso questo tempo di funzionamento. 0 lo disattiva. Al massimo 24 ore.",
+          "update_interval": "Con quale frequenza viene aggiornato il sensore del tempo trascorso durante il funzionamento, tra 1 secondo e 1 ora. Intervalli più brevi scrivono più dati nel database."
+        },
+        "sections": {
+          "source": {
+            "name": "Entità sorgente",
+            "description": "Facoltativo: il cronometro segue un'entità, ad es. un televisore o un sensore della finestra. Funziona finché l'entità è in uno degli stati di funzionamento e va in pausa altrimenti.",
+            "data": {
+              "source_entity": "Entità sorgente",
+              "running_states": "Stati di funzionamento",
+              "grace_period": "Tolleranza in caso di indisponibilità",
+              "auto_stop": "Arresta automaticamente dopo inattività",
+              "auto_stop_delay": "Inattività prima dell'arresto"
+            },
+            "data_description": {
+              "source_entity": "Lascia vuoto per controllare il cronometro solo con pulsanti, azioni e automazioni.",
+              "running_states": "Stati dell'entità sorgente in cui il cronometro funziona, ad es. \"playing\" o \"on\". Puoi inserire valori personalizzati.",
+              "grace_period": "Se la sorgente resta non disponibile o sconosciuta più a lungo di questo tempo, il cronometro va in pausa con effetto retroattivo dall'inizio dell'interruzione. 0 disattiva la tolleranza: la non disponibilità mette subito in pausa, come qualsiasi altro stato che non sia di funzionamento. Al massimo 1 ora.",
+              "auto_stop": "Se la sorgente resta inattiva per il tempo indicato sotto, la sessione termina: il cronometro viene fermato e azzerato. Il tempo della sessione rimane nel sensore \"Ultima sessione\". Il successivo avvio della sorgente inizia una nuova sessione.",
+              "auto_stop_delay": "Per quanto tempo la sorgente deve restare inattiva prima che il cronometro si fermi, al massimo 7 giorni. 0: il cronometro si ferma non appena la sorgente diventa inattiva."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "interval_too_long": "L'intervallo può essere al massimo di 24 ore.",
+      "update_interval_out_of_range": "L'intervallo di aggiornamento deve essere compreso tra 1 secondo e 1 ora.",
+      "running_states_required": "Seleziona almeno uno stato di funzionamento per l'entità sorgente.",
+      "grace_period_too_long": "La tolleranza può essere al massimo di 1 ora.",
+      "auto_stop_delay_too_long": "L'inattività prima dell'arresto può essere al massimo di 7 giorni."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "title": "Opzioni del cronometro",
+        "data": {
+          "interval": "Intervallo",
+          "update_interval": "Intervallo di aggiornamento del sensore"
+        },
+        "data_description": {
+          "interval": "Genera un evento di intervallo ogni volta che è trascorso questo tempo di funzionamento. 0 lo disattiva. Al massimo 24 ore.",
+          "update_interval": "Con quale frequenza viene aggiornato il sensore del tempo trascorso durante il funzionamento, tra 1 secondo e 1 ora. Intervalli più brevi scrivono più dati nel database."
+        },
+        "sections": {
+          "source": {
+            "name": "Entità sorgente",
+            "description": "Facoltativo: il cronometro segue un'entità, ad es. un televisore o un sensore della finestra. Funziona finché l'entità è in uno degli stati di funzionamento e va in pausa altrimenti.",
+            "data": {
+              "source_entity": "Entità sorgente",
+              "running_states": "Stati di funzionamento",
+              "grace_period": "Tolleranza in caso di indisponibilità",
+              "auto_stop": "Arresta automaticamente dopo inattività",
+              "auto_stop_delay": "Inattività prima dell'arresto"
+            },
+            "data_description": {
+              "source_entity": "Lascia vuoto per controllare il cronometro solo con pulsanti, azioni e automazioni.",
+              "running_states": "Stati dell'entità sorgente in cui il cronometro funziona, ad es. \"playing\" o \"on\". Puoi inserire valori personalizzati.",
+              "grace_period": "Se la sorgente resta non disponibile o sconosciuta più a lungo di questo tempo, il cronometro va in pausa con effetto retroattivo dall'inizio dell'interruzione. 0 disattiva la tolleranza: la non disponibilità mette subito in pausa, come qualsiasi altro stato che non sia di funzionamento. Al massimo 1 ora.",
+              "auto_stop": "Se la sorgente resta inattiva per il tempo indicato sotto, la sessione termina: il cronometro viene fermato e azzerato. Il tempo della sessione rimane nel sensore \"Ultima sessione\". Il successivo avvio della sorgente inizia una nuova sessione.",
+              "auto_stop_delay": "Per quanto tempo la sorgente deve restare inattiva prima che il cronometro si fermi, al massimo 7 giorni. 0: il cronometro si ferma non appena la sorgente diventa inattiva."
+            }
+          }
+        }
+      }
+    },
+    "error": {
+      "interval_too_long": "L'intervallo può essere al massimo di 24 ore.",
+      "update_interval_out_of_range": "L'intervallo di aggiornamento deve essere compreso tra 1 secondo e 1 ora.",
+      "running_states_required": "Seleziona almeno uno stato di funzionamento per l'entità sorgente.",
+      "grace_period_too_long": "La tolleranza può essere al massimo di 1 ora.",
+      "auto_stop_delay_too_long": "L'inattività prima dell'arresto può essere al massimo di 7 giorni."
+    }
+  },
+  "entity": {
+    "button": {
+      "start": {
+        "name": "Avvia"
+      },
+      "pause": {
+        "name": "Pausa"
+      },
+      "stop": {
+        "name": "Ferma"
+      },
+      "reset": {
+        "name": "Azzera"
+      },
+      "toggle": {
+        "name": "Avvia/Pausa"
+      }
+    },
+    "sensor": {
+      "elapsed": {
+        "name": "Tempo trascorso",
+        "state_attributes": {
+          "elapsed_formatted": {
+            "name": "Tempo trascorso (formattato)"
+          },
+          "status": {
+            "name": "Stato",
+            "state": {
+              "idle": "Pronto",
+              "running": "In corso",
+              "paused": "In pausa"
+            }
+          },
+          "started_at": {
+            "name": "Avviato alle"
+          },
+          "running_since": {
+            "name": "In corso da"
+          },
+          "accumulated_seconds": {
+            "name": "Secondi accumulati"
+          },
+          "interval_count": {
+            "name": "Numero di intervalli"
+          }
+        }
+      },
+      "status": {
+        "name": "Stato",
+        "state": {
+          "idle": "Pronto",
+          "running": "In corso",
+          "paused": "In pausa"
+        }
+      },
+      "last_session": {
+        "name": "Ultima sessione",
+        "state_attributes": {
+          "elapsed_formatted": {
+            "name": "Ultima sessione (formattata)"
+          },
+          "ended_at": {
+            "name": "Terminata alle"
+          }
+        }
+      }
+    },
+    "event": {
+      "events": {
+        "name": "Eventi",
+        "state_attributes": {
+          "event_type": {
+            "state": {
+              "started": "Avviato",
+              "paused": "In pausa",
+              "resumed": "Ripreso",
+              "stopped": "Fermato",
+              "reset": "Azzerato",
+              "interval": "Intervallo raggiunto"
+            }
+          },
+          "elapsed_seconds": {
+            "name": "Secondi trascorsi"
+          },
+          "elapsed_formatted": {
+            "name": "Tempo trascorso (formattato)"
+          },
+          "interval_count": {
+            "name": "Numero di intervalli"
+          },
+          "source": {
+            "name": "Origine",
+            "state": {
+              "action": "Azione",
+              "button": "Pulsante",
+              "source_entity": "Entità sorgente",
+              "auto_stop": "Arresto automatico"
+            }
+          }
+        }
+      }
+    }
+  },
+  "exceptions": {
+    "no_stopwatch_targeted": {
+      "message": "Non è stato selezionato alcun cronometro caricato. Seleziona un'entità o un dispositivo di Stopwatch Plus."
+    }
+  },
+  "services": {
+    "start": {
+      "name": "Avvia",
+      "description": "Avvia i cronometri selezionati, o li riprende se sono in pausa."
+    },
+    "pause": {
+      "name": "Metti in pausa",
+      "description": "Mette in pausa i cronometri selezionati."
+    },
+    "stop": {
+      "name": "Ferma",
+      "description": "Ferma i cronometri selezionati e li azzera."
+    },
+    "reset": {
+      "name": "Azzera",
+      "description": "Azzera i cronometri selezionati. Quelli in funzione continuano e ricominciano a contare da zero, quelli in pausa vengono fermati."
+    },
+    "toggle": {
+      "name": "Commuta",
+      "description": "Mette in pausa i cronometri selezionati se sono in funzione, altrimenti li avvia."
+    }
+  },
+  "device_automation": {
+    "trigger_type": {
+      "started": "Cronometro avviato",
+      "paused": "Cronometro in pausa",
+      "resumed": "Cronometro ripreso",
+      "stopped": "Cronometro fermato",
+      "reset": "Cronometro azzerato",
+      "interval": "Intervallo raggiunto"
+    }
+  }
+}
