@@ -389,10 +389,12 @@ const CARD_STYLES = `
     color: var(--warning-color);
   }
   /* Narrow cards, e.g. half of a section in a dashboard with several columns */
-  @container (max-width: 240px) {
+  @container (max-width: 170px) {
     .standard .status {
       display: none;
     }
+  }
+  @container (max-width: 240px) {
     .controls {
       gap: 8px;
     }

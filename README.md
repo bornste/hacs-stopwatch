@@ -11,14 +11,11 @@ The stopwatch with the plus – in case Home Assistant adds its own one day.
 
 [![Tests](https://img.shields.io/github/actions/workflow/status/bornste/hacs-stopwatch/tests.yml?branch=main&label=Tests&logo=github&style=flat-square)](https://github.com/bornste/hacs-stopwatch/actions/workflows/tests.yml)
 [![Validate](https://img.shields.io/github/actions/workflow/status/bornste/hacs-stopwatch/validate.yml?branch=main&label=Validate&logo=github&style=flat-square)](https://github.com/bornste/hacs-stopwatch/actions/workflows/validate.yml)
-[![Release](https://img.shields.io/github/v/release/bornste/hacs-stopwatch?include_prereleases&sort=semver&style=flat-square)](https://github.com/bornste/hacs-stopwatch/releases)
+[![Release](https://img.shields.io/github/v/release/bornste/hacs-stopwatch?sort=semver&style=flat-square)](https://github.com/bornste/hacs-stopwatch/releases)
 [![HACS Custom](https://img.shields.io/badge/HACS-Custom-orange?style=flat-square)](https://hacs.xyz/docs/faq/custom_repositories/)
 [![Home Assistant](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fraw.githubusercontent.com%2Fbornste%2Fhacs-stopwatch%2Fmain%2Fhacs.json&query=%24.homeassistant&label=Home%20Assistant&suffix=%2B&color=41BDF5&logo=homeassistant&logoColor=white&style=flat-square)](https://www.home-assistant.io/)
 [![License](https://img.shields.io/github/license/bornste/hacs-stopwatch?style=flat-square)](LICENSE)
 [![Ko-fi](https://img.shields.io/badge/Ko--fi-Support%20me-FF5E5B?logo=ko-fi&logoColor=white&style=flat-square)](https://ko-fi.com/bornste)
-
-> [!NOTE]
-> Early version (0.x): ready to use, but details may still change until 1.0. Feedback and ideas are welcome in the [issues](https://github.com/bornste/hacs-stopwatch/issues).
 
 A stopwatch integration for [Home Assistant](https://www.home-assistant.io/) that counts **up**, can be paused and resumed, and fires events at configurable intervals of running time. Home Assistant's built-in `timer` only counts down; Stopwatch Plus fills that gap.
 
@@ -36,10 +33,6 @@ A stopwatch integration for [Home Assistant](https://www.home-assistant.io/) tha
 - **Database-friendly:** the sensor update interval is configurable (default 60 seconds); the card counts live anyway.
 - **Translations:** English and German. Contributions are welcome: copy [`en.json`](custom_components/stopwatch_plus/translations/en.json), translate it, save it as `<language code>.json` (e.g. `fr.json`) and open a pull request.
 - Icon and logo in light and dark.
-
-## Roadmap
-
-- Inclusion in the default HACS store.
 
 ## How it works
 

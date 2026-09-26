@@ -1,6 +1,6 @@
 # Stopwatch Plus – Specification (draft)
 
-Last updated: 2026-09-24. Repository: https://github.com/bornste/hacs-stopwatch (public).
+Last updated: 2026-09-26. Repository: https://github.com/bornste/hacs-stopwatch (public).
 
 ## Decisions
 
@@ -131,7 +131,7 @@ Same principle as the core `timer`: the state changes rarely and the frontend do
 - One file, `custom_components/stopwatch_plus/www/stopwatch-plus-card.js`, plain JavaScript (web components, no build step, no dependencies besides the elements of the Home Assistant frontend such as `ha-card` and `ha-icon`).
 - The integration serves the folder under `/stopwatch_plus_frontend/` and adds the file with `frontend.add_extra_js_url` (URL with `?v=<version>` so browsers load a new version). `frontend` and `http` are `after_dependencies`; without them (tests, minimal setups) nothing is registered.
 - The elements are defined only after the frontend has started (`home-assistant` defined): the frontend replaces `window.customElements` with a scoped registry polyfill, and elements defined earlier would not be found ("Custom element doesn't exist").
-- Card `custom:stopwatch-plus-card`: options `entity` (any entity of a stopwatch; the elapsed time and last session sensors are found via the device and the translation keys `elapsed` / `last_session`), `name`, `layout` (`standard` / `compact`), `buttons` (subset of `toggle`, `stop`, `reset`; default: all three in the standard layout, `toggle` and `stop` in the compact one), `hide_status`, `hide_last_session`. The time shrinks with the card width (container query units) and a bit more from one day on; container queries leave out the status badge (below 240 px), the icon (standard below 150 px, compact below 340 px) and the secondary line of the compact layout on narrow cards. The tile feature keeps the time fully visible and narrows the buttons instead. Visual editor via `getConfigForm`, card picker entry, stub config with the first stopwatch, and `getEntitySuggestion` for the "By entity" suggestions (standard, compact, tile card with the feature and `hide_state`). Buttons call the actions `stopwatch_plus.toggle`, `stop` and `reset`; Stop and Reset are disabled while idle.
+- Card `custom:stopwatch-plus-card`: options `entity` (any entity of a stopwatch; the elapsed time and last session sensors are found via the device and the translation keys `elapsed` / `last_session`), `name`, `layout` (`standard` / `compact`), `buttons` (subset of `toggle`, `stop`, `reset`; default: all three in the standard layout, `toggle` and `stop` in the compact one), `hide_status`, `hide_last_session`. The time shrinks with the card width (container query units) and a bit more from one day on; container queries leave out the status badge (below 170 px), the icon (standard below 150 px, compact below 340 px) and the secondary line of the compact layout on narrow cards. The tile feature keeps the time fully visible and narrows the buttons instead. Visual editor via `getConfigForm`, card picker entry, stub config with the first stopwatch, and `getEntitySuggestion` for the "By entity" suggestions (standard, compact, tile card with the feature and `hide_state`). Buttons call the actions `stopwatch_plus.toggle`, `stop` and `reset`; Stop and Reset are disabled while idle.
 - Tile card feature `custom:stopwatch-plus-controls` for any stopwatch entity: options `hide_time` and `buttons` (subset of `toggle`, `stop`, `reset`).
 - Texts in English and German (from the user language), statuses via the entity translations.
 
@@ -166,7 +166,7 @@ CHANGELOG.md
 2. **Source entity** – done: binding with running states, grace period with backdated pause, auto-reset for new sessions (changed to auto-stop in 0.3.0), persisted across restarts; settings in a collapsible "Source entity" section of the config and options flow.
 3. **Device triggers** – done: one device trigger per event type (`started`, `paused`, `resumed`, `stopped`, `reset`, `interval`), based on `stopwatch_plus_event` filtered by `device_id` and `type`; translated names in English and German.
 4. **Dashboard card** – done: card with standard and compact layout, visual editor and tile card feature, counting live in the browser; shipped and registered by the integration.
-5. Icon, first release v0.1.0, submission to HACS.
+5. **Release and HACS** – icon and first release v0.1.0 done; card tested with the frontends of 2026.1 and 2026.9; v1.0.0 prepared; submission to the HACS default list open.
 
 ## Quality
 

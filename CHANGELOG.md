@@ -4,6 +4,10 @@ All notable changes to Stopwatch Plus are documented here. The format follows [K
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-09-26
+
+First stable release.
+
 ### Added
 
 - Dashboard card *Stopwatch Plus* (`custom:stopwatch-plus-card`), shipped with the integration and loaded automatically: counts live in the browser every second, independent of the sensor update interval, with buttons for Start/Pause, Stop and Reset (selectable), the status and the last session. Layouts *standard* and *compact*, visual editor, English and German.
@@ -53,7 +57,8 @@ First pre-release.
 - English and German translations.
 - Icon and logo, light and dark (shown from Home Assistant 2026.3 on).
 
-[Unreleased]: https://github.com/bornste/hacs-stopwatch/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/bornste/hacs-stopwatch/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/bornste/hacs-stopwatch/compare/v0.3.0...v1.0.0
 [0.3.0]: https://github.com/bornste/hacs-stopwatch/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/bornste/hacs-stopwatch/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/bornste/hacs-stopwatch/releases/tag/v0.1.0
